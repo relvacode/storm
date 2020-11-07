@@ -1,0 +1,13 @@
+<p-overlayPanel #overlay appendTo="body">
+  <ng-template pTemplate>
+      <p-progressSpinner *ngIf="processing"></p-progressSpinner>
+      <div *ngIf="!processing" class="p-d-flex p-flex-column">
+        <button (click)="onRemove(false)" type="button" pButton pRipple class="p-button t-overlay-button t-button-alt"
+                label="Remove"></button>
+        <button (click)="onRemove(true)" type="button" pButton pRipple class="p-button p-button-danger t-overlay-button"
+                label="Remove With Data"></button>
+      </div>
+
+
+  </ng-template>
+</p-overlayPanel>

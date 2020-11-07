@@ -1,0 +1,31 @@
+
+.t-connectivity {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  padding: .2rem;
+  color: #fff;
+  font-weight: 600;
+
+  &.connected {
+    background-color: #5ab132;
+  }
+
+  &.disconnected {
+    background-color: #d45e6a
+  }
+
+
+  &.transition {
+    transition: 1s;
+
+    &.transition-closing {
+      transform: translateY(100%);
+    }
+  }
+
+
+}
+
+

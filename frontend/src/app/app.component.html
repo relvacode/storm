@@ -1,0 +1,64 @@
+<div class="p-menubar p-d-flex p-flex-row p-align-center p-justify-between p-flex-nowrap">
+
+  <t-breakpoint-overlay icon="fas fa-bars" styleClass="t-button-overlay">
+    <button pButton pRipple (click)="menu.toggle($event)" icon="fas fa-plus" class="t-button-alt"
+            pTooltip="Add Torrent"></button>
+    <t-add-torrent-menu #menu></t-add-torrent-menu>
+
+    <button pButton pRipple type="button" class="t-menu-button"
+            (click)="onToggleInView(stateInView === 'Paused' ? 'resume' : 'pause', torrents)"
+            [disabled]="empty"
+            [pTooltip]="stateInView == 'Paused' ? 'Resume' : 'Pause'"
+            [icon]="stateInView === 'Paused' ? 'fas fa-play' : 'fas fa-pause'"
+    ></button>
+
+    <t-delete-torrent-overlay #remove [torrents]="hashesInView"></t-delete-torrent-overlay>
+    <button pButton pRipple (click)="remove.toggle($event)" type="button" icon="far fa-trash-alt"
+            [disabled]="empty"
+
+            class="p-button-danger t-menu-button"
+            pTooltip="Remove Displayed"></button>
+  </t-breakpoint-overlay>
+
+
+  <t-torrent-search (search)="searchText = $event"></t-torrent-search>
+
+  <t-breakpoint-overlay icon="fas fa-filter" [contentActivated]="($get | async) !== null" styleClass="t-filter-overlay">
+    <p-dropdown [options]="sortOptions"
+                [(ngModel)]="sortByField" placeholder="Sort"></p-dropdown>
+    <p-dropdown [options]="filterStatesOptions"
+                (onChange)="$get.next($event.value)" placeholder="State"></p-dropdown>
+  </t-breakpoint-overlay>
+
+
+</div>
+
+
+<ng-template #displayNotLoaded>
+  <div class="t-empty p-d-flex p-flex-column p-justify-center p-align-center">
+    <i class="fas fa-circle-notch fa-spin"></i>
+  </div>
+</ng-template>
+
+<ng-template #displayEmpty>
+  <div class="t-empty p-d-flex p-flex-column p-justify-center p-align-center">
+    <i class="fas fa-cloud-moon"></i>
+    <span>No Torrents</span>
+  </div>
+</ng-template>
+
+<ng-container *ngIf="torrents | torrentSearch: searchText as result; else displayNotLoaded">
+  <div class="layout-content">
+    <div class="p-grid">
+      <div class="p-col-12"
+           *ngFor="let item of result | orderBy: sortByField; trackBy: trackBy">
+        <t-torrent [torrent]="item" [hash]="item.hash"></t-torrent>
+      </div>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!result.length" [ngTemplateOutlet]="displayEmpty"></ng-container>
+</ng-container>
+
+
+<t-connectivity-status [connected]="connected"></t-connectivity-status>

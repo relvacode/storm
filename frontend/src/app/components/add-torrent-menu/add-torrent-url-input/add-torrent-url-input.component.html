@@ -1,0 +1,14 @@
+<span class="p-input-icon-left">
+    <i class="fas fa-link"></i>
+    <input type="text" pInputText placeholder="Torrent URL" [(ngModel)]="url" autofocus/>
+</span>
+
+<t-add-torrent-config [config]="config"></t-add-torrent-config>
+
+<p-messages [(value)]="errorMessages"></p-messages>
+
+<div class="p-d-flex p-flex-row p-justify-between">
+  <button pButton label="Add" [icon]="submitIcon" [disabled]="submitIsDisabled" (click)="onSubmit()"></button>
+  <button pButton class="p-button-danger" label="Cancel" icon="fas fa-times" (click)="close()"></button>
+</div>
+

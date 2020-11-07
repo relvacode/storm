@@ -1,0 +1,100 @@
+<!--MaxConnections?: number;-->
+<!--MaxUploadSlots?: number;-->
+<!--MaxUploadSpeed?: number;-->
+<!--MaxDownloadSpeed?: number;-->
+<!--PrioritizeFirstLastPieces?: boolean;-->
+<!--PreAllocateStorage?: boolean; // compact_allocation for v1-->
+<!--DownloadLocation?: string;-->
+<!--AutoManaged?: boolean;-->
+<!--StopAtRatio?: boolean;-->
+<!--StopRatio?: number;-->
+<!--RemoveAtRatio?: number;-->
+<!--MoveCompleted?: boolean;-->
+<!--MoveCompletedPath?: string;-->
+<!--AddPaused?: boolean;-->
+
+<p-accordion>
+  <p-accordionTab header="Torrent Options" [selected]="false">
+    <ng-template pTemplate="content">
+      <div class="p-grid p-fluid">
+        <div class="p-field-checkbox p-col-12 p-md-3">
+          <p-checkbox inputId="o-addPaused" binary="true" [(ngModel)]="config.AddPaused">
+          </p-checkbox>
+          <label for="o-addPaused">Add Paused</label>
+        </div>
+
+        <div class="p-field p-col-12 p-md-3">
+          <label for="o-maxConnections">Max Connections</label>
+          <p-inputNumber inputId="o-maxConnections" [(ngModel)]="config.MaxConnections">
+          </p-inputNumber>
+        </div>
+
+        <div class="p-field p-col-12 p-md-3">
+          <label for="o-maxUploadSlots">Max Upload Slots</label>
+          <p-inputNumber inputId="o-maxUploadSlots" [(ngModel)]="config.MaxUploadSlots">
+          </p-inputNumber>
+        </div>
+
+        <div class="p-field-checkbox p-col-12 p-md-3">
+          <p-checkbox inputId="o-firstLastPieces" binary="true" [(ngModel)]="config.PrioritizeFirstLastPieces">
+          </p-checkbox>
+          <label for="o-firstLastPieces">Prioritise First and Last Pieces</label>
+        </div>
+
+        <div class="p-field-checkbox p-col-12 p-md-3">
+          <p-checkbox inputId="o-preAllocate" binary="true" [(ngModel)]="config.PreAllocateStorage">
+          </p-checkbox>
+          <label for="o-preAllocate">Pre-Allocate Storage</label>
+        </div>
+
+      </div>
+      <div class="p-grid p-fluid">
+        <div class="p-field-checkbox p-col-12 p-md-3">
+          <p-checkbox inputId="o-stopAtRatio" binary="true" [(ngModel)]="config.StopAtRatio"
+                      (ngModelChange)="unsetFields($event, 'StopAtRatio', 'StopRatio')">
+          </p-checkbox>
+          <label for="o-stopAtRatio">Stop At Ratio</label>
+
+        </div>
+
+        <div class="p-field p-col-12 p-md-3">
+          <label for="o-stopRatio">Stop Ratio</label>
+          <p-inputNumber inputId="o-stopRatio" [(ngModel)]="config.StopRatio" [disabled]="!config.StopAtRatio">
+          </p-inputNumber>
+        </div>
+
+        <div class="p-field p-col-12 p-md-3">
+          <label for="o-removeAtRatio">Remove At Ratio</label>
+          <p-inputNumber inputId="o-removeAtRatio" [(ngModel)]="config.RemoveAtRatio">
+          </p-inputNumber>
+        </div>
+
+      </div>
+      <div class="p-grid p-fluid">
+
+        <div class="p-field p-col-12">
+          <label for="o-downloadLocation">Download Location</label>
+          <input pInputText inputId="o-downloadLocation" [(ngModel)]="config.DownloadLocation">
+        </div>
+
+      </div>
+      <div class="p-grid p-fluid">
+        <div class="p-field-checkbox p-col-12 p-md-3">
+          <p-checkbox inputId="o-moveCompleted" binary="true" [(ngModel)]="config.MoveCompleted"
+                      (ngModelChange)="unsetFields($event, 'MoveCompleted', 'MoveCompletedPath')">
+          </p-checkbox>
+          <label for="o-moveCompleted">Move Completed</label>
+
+        </div>
+
+        <div class="p-field p-col-12 p-md-9">
+          <label for="o-moveCompletedPath">Moved Completed Path</label>
+          <input pInputText inputId="o-moveCompletedPath" [(ngModel)]="config.MoveCompletedPath"
+                 [disabled]="!config.MoveCompleted">
+        </div>
+
+      </div>
+    </ng-template>
+
+  </p-accordionTab>
+</p-accordion>

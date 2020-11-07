@@ -1,0 +1,20 @@
+<div *ngIf="$breakpoint | async; else content">
+
+  <p-overlayPanel #panel appendTo="body">
+    <div class="p-d-flex p-flex-column" [classList]="styleClass">
+      <ng-content *ngTemplateOutlet="content">
+      </ng-content>
+    </div>
+  </p-overlayPanel>
+
+
+  <button pButton pRipple (click)="panel.toggle($event)" type="button" [icon]="icon"></button>
+  <span class="t-activity-marker" *ngIf="contentActivated"></span>
+</div>
+
+<ng-template #content>
+  <ng-content>
+  </ng-content>
+</ng-template>
+
+

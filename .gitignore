@@ -1,0 +1,7 @@
+.idea
+cmd/storm/storm
+*-packr.go
+
+frontend/node_modules
+frontend/.idea
+frontend/dist

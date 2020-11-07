@@ -1,0 +1,18 @@
+span {
+  &.t-state {
+    margin-right: 4px;
+
+    & i {
+      font-size: .6rem;
+    }
+  }
+  &.t-state-Queued {
+    color: #adaf16;
+  }
+  &.t-state-Downloading {
+    color: #5ab132;
+  }
+  &.t-state-Error {
+    color: #d45e6a;
+  }
+}

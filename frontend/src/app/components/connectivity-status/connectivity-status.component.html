@@ -1,0 +1,4 @@
+<div class="t-connectivity" [class.connected]="connected" [class.disconnected]="!connected"
+     [class.transition]="animate" [class.transition-closing]="closing" *ngIf="$visible | async">
+  <span>{{ connected ? 'connected' : 'not connected'}}</span>
+</div>

@@ -1,0 +1,9 @@
+<div class="p-d-flex p-flex-row t-search">
+  <div class="p-inputgroup">
+    <button type="button" pButton pRipple *ngIf="icon" [icon]="icon" (click)="onAdd()" class="p-button-success"></button>
+
+    <input type="text" pInputText [(ngModel)]="searchText" placeholder="Search or Torrent URL" (ngModelChange)="onChange($event)">
+    <button type="button" *ngIf="searchText" pButton pRipple icon="fas fa-times" (click)="onClear()"></button>
+  </div>
+</div>
+

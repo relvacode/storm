@@ -1,0 +1,11 @@
+<p-fileUpload name="torrent" customUpload="true"
+              [disabled]="submitIsDisabled"
+              (uploadHandler)="onSubmit($event)"
+              (onClear)="onResetErrors()"
+></p-fileUpload>
+
+<t-add-torrent-config [config]="config"></t-add-torrent-config>
+
+<p-messages [(value)]="errorMessages"></p-messages>
+
+<button pButton class="p-button-danger" label="Cancel" icon="fas fa-times" (click)="close()"></button>

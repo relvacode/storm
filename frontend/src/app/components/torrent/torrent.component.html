@@ -1,0 +1,54 @@
+<div class="p-card p-component">
+  <div class="p-card-body">
+    <div class="p-d-flex p-flex-column p-flex-md-row">
+      <div class="p-d-flex p-flex-column p-md-8">
+        <div class="p-card-title">
+          {{torrent.Name}}
+        </div>
+        <div class="p-card-subtitle">
+          <t-torrent-state [state]="torrent.State"></t-torrent-state>
+        </div>
+      </div>
+
+
+      <div class="p-d-flex p-flex-column t-bar p-col-12 p-md-4">
+        <p-progressBar [value]="torrent.Progress | number: '1.0-2'"></p-progressBar>
+      </div>
+    </div>
+
+
+    <div class="p-d-flex p-flex-row p-justify-between t-details">
+      <div class="t-info">
+
+        <span pTooltip="Download Speed">
+          <i class="fas fa-download"></i>
+          {{torrent.DownloadPayloadRate |filesize}}
+        </span>
+
+        <span pTooltip="Upload Speed">
+          <i class="fas fa-upload"></i>
+          {{torrent.UploadPayloadRate |filesize}}
+        </span>
+
+        <span pTooltip="Total Size">
+          <i class="far fa-hdd"></i>
+          {{torrent.TotalSize | filesize}}
+        </span>
+      </div>
+
+      <div class="t-controls">
+        <button pButton pRipple (click)="onChangeState()" type="button"
+                [icon]="torrent.State == 'Paused' ? 'fas fa-play' : 'fas fa-pause'"
+                class="p-button-text"
+                [pTooltip]="torrent.State == 'Paused' ? 'Resume' : 'Pause'"></button>
+
+        <t-delete-torrent-overlay #remove [torrents]="[hash]" (removed)="removed.emit($event)"></t-delete-torrent-overlay>
+        <button pButton pRipple (click)="remove.toggle($event)" type="button" icon="far fa-trash-alt"
+                class="p-button-text p-button-danger"
+                pTooltip="Remove"></button>
+      </div>
+
+    </div>
+
+  </div>
+</div>

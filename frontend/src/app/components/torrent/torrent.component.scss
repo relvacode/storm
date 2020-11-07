@@ -1,0 +1,50 @@
+.p-card-body {
+  flex-grow: 1;
+  margin-right: .4rem;
+  padding: .4rem;
+
+  & .p-card-title {
+    font-size: 1rem;
+    word-break: break-word;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+
+  & .p-card-subtitle {
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 0.4rem;
+  }
+}
+
+
+.p-lg-8, .p-lg-4 {
+  padding: 0;
+}
+
+.t-bar {
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.t-controls {
+  text-align: right;
+}
+
+.t-info {
+  opacity: .4;
+  padding: .4rem;
+
+  & span {
+    word-break: break-all;
+
+    & i {
+      vertical-align: bottom;
+      margin-right: 4px;
+    }
+
+    &:not(:last-child) {
+      margin-right: 12px;
+    }
+  }
+}

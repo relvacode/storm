@@ -1,0 +1,79 @@
+.p-menubar {
+  padding: .5rem 1rem;
+
+  & button.t-menu-button:not(:first-child) {
+    margin-left: 6px;
+  }
+
+  & p-dropdown:not(:first-child) {
+    margin-left: 12px;
+  }
+
+  t-torrent-search {
+    margin: 0 12px;
+    flex-grow: 1;
+  }
+}
+
+.layout-content {
+  padding: 2rem;
+  background-color: var(--surface-b);
+}
+
+::ng-deep .t-button-overlay {
+  & button.p-button:not(:first-child) {
+    margin-left: 12px;
+  }
+}
+
+::ng-deep .t-filter-overlay {
+  min-width: 160px;
+
+  & > * {
+    width: 100%;
+
+    &:not(:last-child) {
+      & .p-dropdown {
+        margin-bottom: .5rem;
+      }
+    }
+
+    & .p-dropdown {
+      width: 100%;
+    }
+  }
+}
+
+
+@media only screen and (max-width: 750px) {
+  .p-menubar {
+    padding: .5rem;
+
+    & p-dropdown:not(:first-child) {
+      margin-left: 6px;
+    }
+  }
+
+  .layout-content {
+    padding: 1rem;
+  }
+}
+
+.t-empty {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  color: #434f5f;
+
+  & i {
+    font-size: 10rem;
+    opacity: .2;
+  }
+
+  & span {
+    margin-top: 2rem;
+    font-weight: 600;
+  }
+}
