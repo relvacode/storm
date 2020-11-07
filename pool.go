@@ -1,4 +1,4 @@
-package deluge_api
+package storm
 
 import (
 	"context"

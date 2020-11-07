@@ -5,7 +5,7 @@ import (
 	"fmt"
 	deluge "github.com/gdm85/go-libdeluge"
 	"github.com/jessevdk/go-flags"
-	deluge_api "github.com/relvacode/deluge-api"
+	storm "github.com/relvacode/storm"
 	"go.uber.org/zap"
 	"net/http"
 	"os"
@@ -101,7 +101,7 @@ type DelugeOptions struct {
 	IdleTime       *Duration `long:"idle-time" env:"POOL_IDLE_TIME" required:"true" default:"30s" description:"Close idle Deluge RPC connections after this duration"`
 }
 
-func (options *DelugeOptions) Client() deluge_api.DelugeProvider {
+func (options *DelugeOptions) Client() storm.DelugeProvider {
 	var settings = deluge.Settings{
 		Hostname:         options.Hostname,
 		Port:             options.Port,
@@ -123,8 +123,8 @@ func (options *DelugeOptions) Client() deluge_api.DelugeProvider {
 	}
 }
 
-func (options *DelugeOptions) Pool(log *zap.Logger) *deluge_api.ConnectionPool {
-	return deluge_api.NewConnectionPool(log, options.MaxConnections, options.IdleTime.Duration, options.Client())
+func (options *DelugeOptions) Pool(log *zap.Logger) *storm.ConnectionPool {
+	return storm.NewConnectionPool(log, options.MaxConnections, options.IdleTime.Duration, options.Client())
 }
 
 type Options struct {
@@ -155,7 +155,7 @@ func Main() error {
 
 	var (
 		apiLog = log.Named("api")
-		api    = deluge_api.New(apiLog, pool)
+		api    = storm.New(apiLog, pool)
 	)
 
 	return (&options.ServerOptions).RunHandler(ctx, apiLog, api)

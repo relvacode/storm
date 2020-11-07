@@ -1,4 +1,4 @@
-package deluge_api
+package storm
 
 import (
 	deluge "github.com/gdm85/go-libdeluge"

@@ -1,4 +1,4 @@
-module github.com/relvacode/deluge-api
+module github.com/relvacode/storm
 
 go 1.15
 
