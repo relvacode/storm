@@ -20,7 +20,7 @@ export class AddTorrentDialogComponentDirective<T> {
   constructor(injector: Injector) {
     this.api = injector.get(ApiService) as ApiService;
     this.ref = injector.get(DynamicDialogRef) as DynamicDialogRef;
-    this.data = (injector.get(DynamicDialogConfig) as DynamicDialogConfig).data;
+    this.data = (injector.get(DynamicDialogConfig) as DynamicDialogConfig).data || {};
     this.config = {};
   }
 
