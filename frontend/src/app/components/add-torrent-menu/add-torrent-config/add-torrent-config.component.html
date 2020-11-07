@@ -17,6 +17,20 @@
   <p-accordionTab header="Torrent Options" [selected]="false">
     <ng-template pTemplate="content">
       <div class="p-grid p-fluid">
+        <div class="p-field p-col-12 p-md-3">
+          <label for="o-maxDownloadSpeed">Max Download Speed</label>
+          <p-inputNumber inputId="o-maxDownloadSpeed" [(ngModel)]="config.MaxDownloadSpeed" [min]="-1"
+                         placeholder="KB/s"></p-inputNumber>
+        </div>
+
+        <div class="p-field p-col-12 p-md-3">
+          <label for="o-maxUploadSpeed">Max Upload Speed</label>
+          <p-inputNumber inputId="o-maxUploadSpeed" [(ngModel)]="config.MaxUploadSpeed" [min]="-1"
+                         placeholder="KB/s"></p-inputNumber>
+        </div>
+      </div>
+
+      <div class="p-grid p-fluid">
         <div class="p-field-checkbox p-col-12 p-md-3">
           <p-checkbox inputId="o-addPaused" binary="true" [(ngModel)]="config.AddPaused">
           </p-checkbox>
@@ -51,7 +65,7 @@
       <div class="p-grid p-fluid">
         <div class="p-field-checkbox p-col-12 p-md-3">
           <p-checkbox inputId="o-stopAtRatio" binary="true" [(ngModel)]="config.StopAtRatio"
-                      (ngModelChange)="unsetFields($event, 'StopAtRatio', 'StopRatio')">
+                      (ngModelChange)="unsetFields($event, 'StopAtRatio', 'StopRatio', 'RemoveAtRatio')">
           </p-checkbox>
           <label for="o-stopAtRatio">Stop At Ratio</label>
 
@@ -65,7 +79,8 @@
 
         <div class="p-field p-col-12 p-md-3">
           <label for="o-removeAtRatio">Remove At Ratio</label>
-          <p-inputNumber inputId="o-removeAtRatio" [(ngModel)]="config.RemoveAtRatio">
+          <p-inputNumber inputId="o-removeAtRatio" [(ngModel)]="config.RemoveAtRatio" [min]="config.StopRatio"
+                         [disabled]="!config.StopRatio && config.StopRatio != 0">
           </p-inputNumber>
         </div>
 

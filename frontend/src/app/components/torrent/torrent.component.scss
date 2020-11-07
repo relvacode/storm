@@ -31,12 +31,24 @@
   text-align: right;
 }
 
+.t-torrent-eta {
+  padding-bottom: 12px;
+  opacity: .6;
+
+  & i {
+    opacity: .4;
+    vertical-align: text-bottom;
+    margin-right: 4px;
+  }
+}
+
 .t-info {
   opacity: .4;
   padding: .4rem;
 
   & span {
     word-break: break-all;
+    margin: 4px 0;
 
     & i {
       vertical-align: bottom;

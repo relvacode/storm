@@ -1,6 +1,10 @@
+<ng-template #torrentInfinite>
+  ∞
+</ng-template>
+
 <div class="p-card p-component">
   <div class="p-card-body">
-    <div class="p-d-flex p-flex-column p-flex-md-row">
+    <div class="p-d-flex p-flex-column p-flex-md-row" style="padding: 0">
       <div class="p-d-flex p-flex-column p-md-8">
         <div class="p-card-title">
           {{torrent.Name}}
@@ -12,22 +16,29 @@
 
 
       <div class="p-d-flex p-flex-column t-bar p-col-12 p-md-4">
-        <p-progressBar [value]="torrent.Progress | number: '1.0-2'"></p-progressBar>
+                  <span pTooltip="ETA" class="t-torrent-eta">
+          <i class="far fa-clock"></i>
+          <ng-container *ngIf="torrent.ETA else torrentInfinite">
+                      {{torrent.ETA | amDuration: 'seconds'}}
+          </ng-container>
+        </span>
+        <p-progressBar [value]="torrent.Progress | number: '1.0-0'">
+
+        </p-progressBar>
       </div>
     </div>
 
 
     <div class="p-d-flex p-flex-row p-justify-between t-details">
-      <div class="t-info">
-
+      <div class="t-info p-d-flex p-flex-row p-flex-wrap">
         <span pTooltip="Download Speed">
           <i class="fas fa-download"></i>
-          {{torrent.DownloadPayloadRate |filesize}}
+          {{torrent.DownloadPayloadRate |filesize}}s
         </span>
 
         <span pTooltip="Upload Speed">
           <i class="fas fa-upload"></i>
-          {{torrent.UploadPayloadRate |filesize}}
+          {{torrent.UploadPayloadRate |filesize}}s
         </span>
 
         <span pTooltip="Total Size">
@@ -42,7 +53,8 @@
                 class="p-button-text"
                 [pTooltip]="torrent.State == 'Paused' ? 'Resume' : 'Pause'"></button>
 
-        <t-delete-torrent-overlay #remove [torrents]="[hash]" (removed)="removed.emit($event)"></t-delete-torrent-overlay>
+        <t-delete-torrent-overlay #remove [torrents]="[hash]"
+                                  (removed)="removed.emit($event)"></t-delete-torrent-overlay>
         <button pButton pRipple (click)="remove.toggle($event)" type="button" icon="far fa-trash-alt"
                 class="p-button-text p-button-danger"
                 pTooltip="Remove"></button>

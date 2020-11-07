@@ -5,13 +5,11 @@ import {ApiService, State, Torrent, Torrents} from './api.service';
 import {SelectItem} from 'primeng/api';
 import {FocusService} from './focus.service';
 
-
 type OptionalState = State | null;
 
 interface HashedTorrent extends Torrent {
   hash: string;
 }
-
 
 @Component({
   selector: 't-root',
@@ -58,12 +56,16 @@ export class AppComponent implements OnInit {
       value: null,
     },
     {
+      label: 'Queued',
+      value: 'Queued',
+    },
+    {
       label: 'Downloading',
       value: 'Downloading',
     },
     {
-      label: 'Queued',
-      value: 'Queued',
+      label: 'Seeding',
+      value: 'Seeding',
     },
     {
       label: 'Paused',

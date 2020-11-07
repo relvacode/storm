@@ -6,12 +6,19 @@ span {
       font-size: .6rem;
     }
   }
+
   &.t-state-Queued {
     color: #adaf16;
   }
+
   &.t-state-Downloading {
     color: #5ab132;
   }
+
+  &.t-state-Seeding {
+    color: #8dd0ff;
+  }
+
   &.t-state-Error {
     color: #d45e6a;
   }

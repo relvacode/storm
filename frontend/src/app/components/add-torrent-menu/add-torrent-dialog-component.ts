@@ -21,7 +21,10 @@ export class AddTorrentDialogComponentDirective<T> {
     this.api = injector.get(ApiService) as ApiService;
     this.ref = injector.get(DynamicDialogRef) as DynamicDialogRef;
     this.data = (injector.get(DynamicDialogConfig) as DynamicDialogConfig).data || {};
-    this.config = {};
+    this.config = {
+      MaxDownloadSpeed: -1,
+      MaxUploadSpeed: -1,
+    };
   }
 
   public close(): void {
