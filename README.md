@@ -10,7 +10,7 @@
 >
 > A slick remote interface for Deluge that fully supports mobile devices (including as a home-screen app)
 
-&nbsp;&nbsp;
+&nbsp;
 
 <p float="left" align="middle">
 <img src="_docs/example-torrent-view.jpg" height="450"/>
