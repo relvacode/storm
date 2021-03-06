@@ -89,7 +89,7 @@ func (options *ServerOptions) RunHandler(ctx context.Context, log *zap.Logger, h
 		errors <- server.ListenAndServe()
 	}()
 
-	log.Info(fmt.Sprintf("Ready to serve HTTP connections on %s%s", options.Listen, options.BasePath))
+	log.Info(fmt.Sprintf("Ready to serve HTTP connections on %s%s", options.Listen, *options.BasePath))
 
 	defer close(errors)
 
