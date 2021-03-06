@@ -36,7 +36,23 @@ The recommended way to run Storm is with a Docker image.
 You'll need a Deluge container running with a valid [auth configuration](https://dev.deluge-torrent.org/wiki/UserGuide/Authentication). 
 Storm needs a way to contact the Deluge RPC daemon so it's best that you create a [Docker network](https://docs.docker.com/engine/tutorials/networkingcontainers/) and attach the Storm container to that network.
 
-Then you can use `DELUGE_RPC_HOSTNAME=deluge_container_name` with `DELUGE_RPC_USERNAME` and `DELUGE_RPC_PASSWORD` from your Deluge auth file.
+Once that's setup you'll need to configure Deluge to allow remote RPC connections:
+
+Open up `core.conf` in your Deluge configuration folder and set
+
+```
+"allow_remote": true
+```
+
+Then you can use the following environment variables to configure Storm
+
+| Environment | Description |
+| ----------- | ----------- |
+| `DELUGE_RPC_HOSTNAME` | The Deluge RPC hostname |
+| `DELUGE_RPC_USERNAME` | The username from Deluge auth |
+| `DELUGE_RPC_PASSWORD` | The password from Deluge auth |
+| `DELUGE_RPC_VERSION` | `v1` or `v2` depending on your Deluge version |
+
 
 __Important__
 
