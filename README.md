@@ -52,7 +52,7 @@ Then you can use the following environment variables to configure Storm
 | `DELUGE_RPC_USERNAME` | The username from Deluge auth |
 | `DELUGE_RPC_PASSWORD` | The password from Deluge auth |
 | `DELUGE_RPC_VERSION` | `v1` or `v2` depending on your Deluge version |
-
+| `STORM_BASE_PATH` | Set the base URL path. Defaults to `/` |
 
 __Important__
 

@@ -37,7 +37,9 @@ import {BreakpointOverlayComponent} from './components/breakpoint-overlay/breakp
 import { TorrentSearchPipe } from './torrent-search.pipe';
 import { ConnectivityStatusComponent } from './components/connectivity-status/connectivity-status.component';
 import { TorrentSearchComponent } from './components/torrent-search/torrent-search.component';
+import {ENVIRONMENT} from "./environment";
 
+// @ts-ignore
 @NgModule({
   declarations: [
     AppComponent,
@@ -86,6 +88,14 @@ import { TorrentSearchComponent } from './components/torrent-search/torrent-sear
       provide: HTTP_INTERCEPTORS,
       useClass: ApiInterceptor,
       multi: true,
+    },
+    {
+      provide: ENVIRONMENT,
+      // @ts-ignore
+      // Environment injection is handled by the server.
+      // It will replace the contents of the initializer in index.html with the environment
+      // specific variables on-demand.
+      useValue: window.environment,
     },
     DialogService,
   ],

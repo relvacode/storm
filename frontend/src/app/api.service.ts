@@ -1,9 +1,9 @@
-import {Injectable} from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
 import {Observable, ObservableInput, throwError} from 'rxjs';
 import {HttpClient, HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpParams, HttpRequest} from '@angular/common/http';
 import {catchError} from 'rxjs/operators';
 import {Message} from 'primeng/api';
-import {environment} from '../environments/environment';
+import {Environment, ENVIRONMENT} from "./environment";
 
 /**
  * Raised when the API returns an error
@@ -115,11 +115,11 @@ export class ApiInterceptor implements HttpInterceptor {
   providedIn: 'root'
 })
 export class ApiService {
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, @Inject(ENVIRONMENT) private environment: Environment) {
   }
 
   private url(endpoint: string): string {
-    return `${environment.baseUrl}${endpoint}`;
+    return `${this.environment.baseApiPath}${endpoint}`;
   }
 
   /**
@@ -134,7 +134,7 @@ export class ApiService {
       }
     });
 
-    return this.http.post<void>(this.url('/torrents/pause'), null, {
+    return this.http.post<void>(this.url('torrents/pause'), null, {
       params
     });
   }
@@ -151,7 +151,7 @@ export class ApiService {
       }
     });
 
-    return this.http.post<void>(this.url('/torrents/resume'), null, {
+    return this.http.post<void>(this.url('torrents/resume'), null, {
       params
     });
   }
@@ -162,7 +162,7 @@ export class ApiService {
    * The torrent ID
    */
   public torrent(id: string): Observable<Torrent> {
-    return this.http.get<Torrent>(this.url(`/torrent/${id}`));
+    return this.http.get<Torrent>(this.url(`torrent/${id}`));
   }
 
 
@@ -177,13 +177,13 @@ export class ApiService {
       }
     }
 
-    return this.http.get<Torrents>(this.url('/torrents'), {
+    return this.http.get<Torrents>(this.url('torrents'), {
       params,
     });
   }
 
   public removeTorrent(withData: boolean, id: string): Observable<void> {
-    return this.http.delete<void>(this.url(`/torrent/${id}`), {
+    return this.http.delete<void>(this.url(`torrent/${id}`), {
       params: new HttpParams({
         fromObject: {
           files: withData ? 'true' : 'false'
@@ -198,6 +198,6 @@ export class ApiService {
    * Add torrent request
    */
   public add(req: AddTorrentRequest): Observable<AddTorrentResponse> {
-    return this.http.post<AddTorrentResponse>(this.url('/torrents'), req);
+    return this.http.post<AddTorrentResponse>(this.url('torrents'), req);
   }
 }
