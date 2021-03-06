@@ -1,17 +1,31 @@
 package storm
 
 import (
+	"bytes"
+	"fmt"
 	deluge "github.com/gdm85/go-libdeluge"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
+	"html/template"
+	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
-func New(log *zap.Logger, pool *ConnectionPool) *Api {
+func appendSuffix(s, suffix string) string {
+	if strings.HasSuffix(s, suffix) {
+		return s
+	}
+
+	return fmt.Sprint(s, suffix)
+}
+
+func New(log *zap.Logger, pool *ConnectionPool, pathPrefix string) *Api {
 	api := &Api{
-		pool:   pool,
-		log:    log,
-		router: mux.NewRouter(),
+		pool:       pool,
+		pathPrefix: strings.TrimSuffix(pathPrefix, "/"),
+		log:        log,
+		router:     mux.NewRouter(),
 	}
 
 	api.router.NotFoundHandler = api.httpNotFound()
@@ -21,7 +35,8 @@ func New(log *zap.Logger, pool *ConnectionPool) *Api {
 }
 
 type Api struct {
-	pool *ConnectionPool
+	pool       *ConnectionPool
+	pathPrefix string
 
 	log    *zap.Logger
 	router *mux.Router
@@ -58,10 +73,6 @@ func (api *Api) DelugeHandler(f DelugeMethod) http.HandlerFunc {
 }
 
 func (api *Api) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Access-Control-Allow-Origin", "http://localhost:4200")
-	rw.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
-	rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-
 	api.router.ServeHTTP(rw, r)
 }
 
@@ -75,9 +86,66 @@ func (api *Api) httpNotFound() http.Handler {
 	})
 }
 
-func (api *Api) bind() {
+func (api *Api) templateContext() interface{} {
+	path := appendSuffix(api.pathPrefix, "/")
+	return map[string]string{
+		"BasePath":    path,
+		"BaseAPIPath": fmt.Sprint(path, "api/"),
+	}
+}
 
-	router := api.router.PathPrefix("/api").Subrouter()
+func (api *Api) renderStaticTemplate(name string) {
+	log := api.log.With(zap.String("template", name))
+
+	data, err := Static.Open(name)
+	if err != nil {
+		log.Error("failed to open template for rendering", zap.Error(err))
+		return
+	}
+
+	tmpl, err := ioutil.ReadAll(data)
+	if err != nil {
+		log.Error("failed to read template", zap.Error(err))
+		return
+	}
+
+	t, err := template.New(name).Parse(string(tmpl))
+	if err != nil {
+		log.Error("failed to parse template", zap.Error(err))
+		return
+	}
+
+	var b bytes.Buffer
+	err = t.Execute(&b, api.templateContext())
+	if err != nil {
+		log.Error("failed to render template", zap.Error(err))
+		return
+	}
+
+	err = Static.AddBytes(name, b.Bytes())
+	if err != nil {
+		log.Error("failed to set bytes", zap.Error(err))
+	}
+}
+
+func (api *Api) bindStatic(router *mux.Router) {
+	api.renderStaticTemplate("/index.html")
+
+	fs := http.FileServer(Static)
+	if api.pathPrefix != "" {
+		fs = http.StripPrefix(api.pathPrefix, fs)
+	}
+
+	router.Methods(http.MethodGet).Handler(fs)
+}
+
+func (api *Api) bind() {
+	primaryRouter := api.router
+	if api.pathPrefix != "" {
+		primaryRouter = api.router.PathPrefix(api.pathPrefix).Subrouter()
+	}
+
+	router := primaryRouter.PathPrefix("/api").Subrouter()
 	router.NotFoundHandler = api.httpNotFound()
 
 	// CORS
@@ -128,5 +196,5 @@ func (api *Api) bind() {
 		HandlerFunc(api.DelugeHandler(TorrentHandler(httpResumeTorrent)))
 
 	// Static files
-	api.router.Methods(http.MethodGet).Handler(http.FileServer(Static))
+	api.bindStatic(primaryRouter)
 }

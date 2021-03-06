@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -40,9 +41,24 @@ func (dur *Duration) UnmarshalFlag(value string) (err error) {
 	return
 }
 
+type Path string
+
+func (p *Path) UnmarshalFlag(value string) error {
+	if strings.HasSuffix(value, "/") {
+		value = strings.TrimSuffix(value, "/")
+	}
+	if !strings.HasPrefix(value, "/") {
+		value = fmt.Sprint("/", value)
+	}
+
+	*p = Path(value)
+	return nil
+}
+
 type ServerOptions struct {
 	Listen   string `short:"l" long:"listen" default:":8221" env:"LISTEN_ADDR" description:"The address for the HTTP server"`
 	LogStyle string `long:"log-style" choice:"production" choice:"console" default:"console" env:"LOGGING_STYLE" description:"The style of log messages"`
+	BasePath *Path  `long:"base-path" required:"true" default:"/" env:"STORM_BASE_PATH" description:"Respond to requests from this base URL path"`
 }
 
 func (options *ServerOptions) Logger() (*zap.Logger, error) {
@@ -73,7 +89,7 @@ func (options *ServerOptions) RunHandler(ctx context.Context, log *zap.Logger, h
 		errors <- server.ListenAndServe()
 	}()
 
-	log.Info(fmt.Sprintf("Ready to serve HTTP connections on %s", options.Listen))
+	log.Info(fmt.Sprintf("Ready to serve HTTP connections on %s%s", options.Listen, options.BasePath))
 
 	defer close(errors)
 
@@ -155,7 +171,7 @@ func Main() error {
 
 	var (
 		apiLog = log.Named("api")
-		api    = storm.New(apiLog, pool)
+		api    = storm.New(apiLog, pool, (string)(*options.BasePath))
 	)
 
 	return (&options.ServerOptions).RunHandler(ctx, apiLog, api)

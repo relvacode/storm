@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Storm</title>
-  <base href="/">
+  <base href="{{ .BasePath }}">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#343e4d">
   <meta name='mobile-web-app-capable' content='yes'>
@@ -14,6 +14,12 @@
   <link rel='icon' sizes='192x192' href='assets/logo@192.png'>
   <link rel='apple-touch-icon' href='assets/logo@152.png'>
   <meta name='msapplication-square310x310logo' content='assets/logo@310.png'>
+
+  <script type="text/javascript">
+    window.environment = {
+      baseApiPath: '{{ .BaseAPIPath }}'
+    }
+  </script>
 </head>
 <body>
 <t-root></t-root>
