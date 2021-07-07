@@ -24,23 +24,18 @@ func NoContent(rw http.ResponseWriter) {
 	rw.WriteHeader(http.StatusNoContent)
 }
 
-// Adaptor converts a HandlerFunc into an http.HandlerFunc.
-// If the function returns an error that error is delivered.
-// If the function returns a non-nil interface that value is delivered as JSON using the HTTP OK response code.
-// If the function returns a nil error and a nil interface then HTTP No Content is delivered.
-func Adaptor(f HandlerFunc) http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {
-		response, err := f(r)
-		if err != nil {
-			SendError(rw, err)
-			return
-		}
-
-		if response == nil {
-			NoContent(rw)
-			return
-		}
-
-		Send(rw, http.StatusOK, response)
+func Handle(rw http.ResponseWriter, r *http.Request, handler HandlerFunc) error {
+	response, err := handler(r)
+	if err != nil {
+		SendError(rw, err)
+		return err
 	}
+
+	if response == nil {
+		NoContent(rw)
+		return nil
+	}
+
+	Send(rw, http.StatusOK, response)
+	return nil
 }

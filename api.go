@@ -42,11 +42,39 @@ type Api struct {
 	router *mux.Router
 }
 
-// Handle wraps a HandlerFunc with Api middleware
-func (api *Api) Handle(f HandlerFunc) http.HandlerFunc {
-	adaptor := Adaptor(f)
-	adaptor = Log(api.log, adaptor)
-	return adaptor
+// logRequest returns a logging function attached to a logger set at the correct level and fields
+// for the given wrapped response, request and handler error.
+func (api *Api) logRequest(rw *ResponseWriter, r *http.Request, err error) func(string, ...zap.Field) {
+	logger := api.log.With(
+		zap.String("Method", r.Method),
+		zap.String("URL", r.URL.String()),
+		zap.String("RemoteAddr", r.RemoteAddr),
+		zap.Time("Time", rw.Started()),
+		zap.Int("StatusCode", rw.code),
+		zap.Int("ResponseSize", rw.Len()),
+		zap.Duration("Duration", rw.Duration()),
+	)
+
+	if err == nil {
+		return logger.Info
+	}
+
+	return logger.With(zap.Error(err)).Error
+}
+
+// Handle constructs a http.HandlerFunc that calls a handler,
+// responds to the client based on the result of the handler call,
+// and logs the result to the Api logger.
+func (api *Api) Handle(handler HandlerFunc) http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		var (
+			wrapped = WrapResponse(rw)
+			err     = Handle(rw, r, handler)
+			log     = api.logRequest(wrapped, r, err)
+		)
+
+		log(http.StatusText(wrapped.Code()))
+	}
 }
 
 func (api *Api) DelugeHandler(f DelugeMethod) http.HandlerFunc {
@@ -61,7 +89,6 @@ func (api *Api) DelugeHandler(f DelugeMethod) http.HandlerFunc {
 
 		switch t := err.(type) {
 		case deluge.RPCError:
-			api.log.Error(t.TraceBack, zap.String("ErrorType", t.ExceptionType), zap.String("ErrorMessage", t.ExceptionMessage))
 			err = RPCError{
 				ExceptionType:    t.ExceptionType,
 				ExceptionMessage: t.ExceptionMessage,

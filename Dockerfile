@@ -11,10 +11,10 @@ RUN npm install -g @angular/cli && \
 
 FROM golang:alpine as compiler
 
-WORKDIR /go/src/app
+WORKDIR /go/src/storm
 
 COPY . .
-COPY --from=frontend-builder /usr/src/app/dist /go/src/app/frontend/dist
+COPY --from=frontend-builder /usr/src/app/dist /go/src/storm/frontend/dist
 
 RUN go get -u github.com/gobuffalo/packr/packr && \
     packr && \
@@ -22,6 +22,6 @@ RUN go get -u github.com/gobuffalo/packr/packr && \
 
 
 FROM alpine
-COPY --from=compiler /go/src/app/storm /usr/bin/storm
+COPY --from=compiler /go/src/storm/storm /usr/bin/storm
 
 ENTRYPOINT ["/usr/bin/storm"]
