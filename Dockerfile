@@ -1,4 +1,4 @@
-FROM node:15 as frontend-builder
+FROM --platform=${BUILDPLATFORM} node:15 as frontend-builder
 
 WORKDIR /usr/src/app
 
@@ -9,7 +9,10 @@ RUN npm install -g @angular/cli && \
     ng build --prod
 
 
-FROM golang:alpine as compiler
+FROM --platform=${BUILDPLATFORM} golang:alpine as compiler
+ARG TARGETOS
+ARG TARGETARCH
+ENV CGO_ENABLED=0
 
 WORKDIR /go/src/storm
 
@@ -18,10 +21,11 @@ COPY --from=frontend-builder /usr/src/app/dist /go/src/storm/frontend/dist
 
 RUN go get -u github.com/gobuffalo/packr/packr && \
     packr && \
-    go build -ldflags="-s -w" github.com/relvacode/storm/cmd/storm
+    go mod tidy && \
+    GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags="-s -w" github.com/relvacode/storm/cmd/storm
 
 
-FROM alpine
+FROM --platform=${TARGETPLATFORM} alpine
 COPY --from=compiler /go/src/storm/storm /usr/bin/storm
 
 ENTRYPOINT ["/usr/bin/storm"]
