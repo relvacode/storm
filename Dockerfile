@@ -1,4 +1,4 @@
-FROM --platform=${BUILDPLATFORM} node:15 as frontend-builder
+FROM --platform=${BUILDPLATFORM} node:16 as frontend-builder
 
 WORKDIR /usr/src/app
 
@@ -19,10 +19,7 @@ WORKDIR /go/src/storm
 COPY . .
 COPY --from=frontend-builder /usr/src/app/dist /go/src/storm/frontend/dist
 
-RUN go get -u github.com/gobuffalo/packr/packr && \
-    packr && \
-    go mod tidy && \
-    GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags="-s -w" github.com/relvacode/storm/cmd/storm
+RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags="-s -w" github.com/relvacode/storm/cmd/storm
 
 
 FROM --platform=${TARGETPLATFORM} alpine

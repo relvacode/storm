@@ -1,14 +1,16 @@
 package storm
 
 import (
-	"bytes"
 	"fmt"
 	deluge "github.com/gdm85/go-libdeluge"
 	"github.com/gorilla/mux"
+	"github.com/spf13/afero"
 	"go.uber.org/zap"
 	"html/template"
+	"io/fs"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -121,49 +123,69 @@ func (api *Api) templateContext() interface{} {
 	}
 }
 
-func (api *Api) renderStaticTemplate(name string) {
+// renderTemplate takes the contents of a go html/template found at source `name`
+// and renders it back to the file system using templateContext().
+func (api *Api) renderTemplate(fs afero.Fs, name string) {
 	log := api.log.With(zap.String("template", name))
 
-	data, err := Static.Open(name)
+	f, err := fs.Open(name)
 	if err != nil {
 		log.Error("failed to open template for rendering", zap.Error(err))
 		return
 	}
 
-	tmpl, err := ioutil.ReadAll(data)
+	templateSource, err := ioutil.ReadAll(f)
 	if err != nil {
 		log.Error("failed to read template", zap.Error(err))
 		return
 	}
 
-	t, err := template.New(name).Parse(string(tmpl))
+	_ = f.Close()
+
+	t, err := template.New(name).Parse(string(templateSource))
 	if err != nil {
 		log.Error("failed to parse template", zap.Error(err))
 		return
 	}
 
-	var b bytes.Buffer
-	err = t.Execute(&b, api.templateContext())
+	w, err := fs.OpenFile(name, os.O_WRONLY|os.O_TRUNC, os.FileMode(0600))
+	if err != nil {
+		log.Error("failed to open template file for writing", zap.Error(err))
+		return
+	}
+
+	err = t.Execute(w, api.templateContext())
 	if err != nil {
 		log.Error("failed to render template", zap.Error(err))
 		return
 	}
 
-	err = Static.AddBytes(name, b.Bytes())
+	err = w.Close()
 	if err != nil {
-		log.Error("failed to set bytes", zap.Error(err))
+		log.Error("failed to close rendered template", zap.Error(err))
+		return
 	}
 }
 
 func (api *Api) bindStatic(router *mux.Router) {
-	api.renderStaticTemplate("/index.html")
+	var (
+		static, _ = fs.Sub(Static, "frontend/dist")
 
-	fs := http.FileServer(Static)
+		mem = afero.NewMemMapFs()
+		ufs = afero.NewCopyOnWriteFs(&afero.FromIOFS{
+			FS: static,
+		}, mem)
+	)
+
+	api.renderTemplate(ufs, "index.html")
+
+	fileServer := http.FileServer(afero.NewHttpFs(ufs).Dir(""))
 	if api.pathPrefix != "" {
-		fs = http.StripPrefix(api.pathPrefix, fs)
+		fileServer = http.StripPrefix(api.pathPrefix, fileServer)
 	}
 
-	router.Methods(http.MethodGet).Handler(fs)
+	router.Methods(http.MethodGet).Handler(fileServer)
+
 }
 
 func (api *Api) bind() {

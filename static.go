@@ -1,7 +1,8 @@
 package storm
 
 import (
-	"github.com/gobuffalo/packr"
+	"embed"
 )
 
-var Static = packr.NewBox("./frontend/dist")
+//go:embed frontend/dist/*
+var Static embed.FS

@@ -14,7 +14,7 @@ services:
       DELUGE_RPC_USERNAME: localclient
       DELUGE_RPC_PASSWORD: 707228f42b81e12377e943271f8c05b796545cd2
     ports:
-      - 8221:8221
+      - "8221:8221"
 
 volumes:
   deluge-config:
