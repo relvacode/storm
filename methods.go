@@ -96,10 +96,10 @@ func httpAddTorrent(conn deluge.DelugeClient, r *http.Request) (interface{}, err
 		id, err = conn.AddTorrentURL(req.URI, &req.Options)
 	case "magnet":
 		id, err = conn.AddTorrentMagnet(req.URI, &req.Options)
-	case "file":
+	case "ptr":
 		id, err = conn.AddTorrentFile(req.URI, req.Data, &req.Options)
 	default:
-		return nil, &Error{Code: http.StatusBadRequest, Message: "Torrent Type must be one of url, magnet or file"}
+		return nil, &Error{Code: http.StatusBadRequest, Message: "Torrent Type must be one of url, magnet or ptr"}
 	}
 
 	if err != nil {
@@ -108,7 +108,7 @@ func httpAddTorrent(conn deluge.DelugeClient, r *http.Request) (interface{}, err
 
 	// The RPC returns an empty ID if the torrent could not be parsed or processed.
 	if id == "" {
-		return nil, &Error{Code: http.StatusUnprocessableEntity, Message: "Torrent file could not be read"}
+		return nil, &Error{Code: http.StatusUnprocessableEntity, Message: "Torrent ptr could not be read"}
 	}
 
 	return AddTorrentResponse{ID: id}, nil
