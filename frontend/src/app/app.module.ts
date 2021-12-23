@@ -50,6 +50,7 @@ import {
 } from './components/torrent-edit-label-dialog/torrent-edit-label-dialog.component';
 import {PluginEnableComponent} from './components/plugin-enable/plugin-enable.component';
 import {MultiSelectModule} from "primeng/multiselect";
+import { ActivityMarkerComponent } from './components/activity-marker/activity-marker.component';
 
 // @ts-ignore
 @NgModule({
@@ -72,6 +73,7 @@ import {MultiSelectModule} from "primeng/multiselect";
     TorrentLabelComponent,
     TorrentEditLabelDialogComponent,
     PluginEnableComponent,
+    ActivityMarkerComponent,
   ],
   imports: [
     BrowserModule,
