@@ -24,9 +24,9 @@
   <t-torrent-search (search)="searchText = $event"></t-torrent-search>
 
   <t-breakpoint-overlay icon="fas fa-filter" [contentActivated]="(get$ | async) !== null" styleClass="t-filter-overlay">
-    <p-dropdown class="t-filter-input" [options]="sortOptions"
+    <p-dropdown class="t-filter-input" [options]="sortOptions" appendTo="body"
                 [(ngModel)]="sortByField" placeholder="Sort"></p-dropdown>
-    <p-dropdown class="t-filter-input" [options]="filterStatesOptions"
+    <p-dropdown class="t-filter-input" [options]="filterStatesOptions" appendTo="body"
                 (onChange)="get$.next($event.value)" placeholder="State"></p-dropdown>
   </t-breakpoint-overlay>
 </div>
