@@ -1,4 +1,5 @@
 .idea
+.angular
 cmd/storm/storm
 
 frontend/node_modules
