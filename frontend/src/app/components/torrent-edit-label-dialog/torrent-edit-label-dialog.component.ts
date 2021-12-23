@@ -17,23 +17,23 @@ interface LabelSuggestion {
 })
 export class TorrentEditLabelDialogComponent {
   id: string
-  label: LabelSuggestion;
+  label: string;
+  initialLabel: string;
 
   query$ = new BehaviorSubject<string>('');
+  refresh$ = new BehaviorSubject<void>(null);
   labels$: Observable<string[]>;
   suggestions$: Observable<LabelSuggestion[]>;
 
-  constructor(private ref: DynamicDialogRef, private config: DynamicDialogConfig, private api: ApiService) {
+  constructor(private ref: DynamicDialogRef, config: DynamicDialogConfig, private api: ApiService) {
     this.id = config.data.id;
-    this.label = {
-      value: config.data.currentLabel ? config.data.currentLabel : '',
-      new: false,
-      clear: !config.data.currentLabel,
-    };
+    this.label = '';
+    this.initialLabel = config.data.currentLabel ? config.data.currentLabel : '';
 
-    this.labels$ = this.api.labels().pipe(
+    this.labels$ = this.refresh$.pipe(
+      switchMap(_ => this.api.labels()),
       shareReplay(1)
-    )
+    );
 
     this.suggestions$ = combineLatest([this.labels$, this.query$]).pipe(
       map(([labels, query]) => {
@@ -42,8 +42,19 @@ export class TorrentEditLabelDialogComponent {
 
         let hasExactMatch = false;
         for (const label of labels) {
+
+          // Don't suggest the initial label
+          if (!!this.initialLabel && preparedQuery === this.initialLabel) {
+            hasExactMatch = true;
+            continue
+          }
+
+          // Suggest an existing label if it partially matches
           if (!preparedQuery || label.includes(preparedQuery)) {
-            suggestions.push({value: label, new: false, clear:false})
+            // Only suggest this label if there was no initial label, or if this label does not match the initial
+            if (this.initialLabel === '' || label !== this.initialLabel) {
+              suggestions.push({value: label, new: false, clear: false})
+            }
           }
 
           if (label === preparedQuery) {
@@ -51,11 +62,13 @@ export class TorrentEditLabelDialogComponent {
           }
         }
 
+        // If there is a query to suggest, and there's no exact match then suggest creating a new label
         if (preparedQuery && !hasExactMatch) {
           suggestions.push({value: preparedQuery, new: true, clear: false})
         }
 
-        if (!preparedQuery) {
+        // If there was an initial label, then suggest clearing it
+        if (!!this.initialLabel) {
           suggestions.push({value: '', new: false, clear: true})
         }
 
@@ -64,13 +77,27 @@ export class TorrentEditLabelDialogComponent {
     )
   }
 
+  onDeleteLabel($event: { preventDefault: () => void }, name: string): void {
+    $event.preventDefault();
+
+    this.api.deleteLabel(name).subscribe(
+      _ => {
+        if (name === this.label) {
+          this.label = '';
+        }
+
+        this.refresh$.next(null)
+      }
+    )
+  }
+
   onComplete($event: { query: string }) {
     this.query$.next($event.query)
   }
 
-  onSubmit(): void {
+  onApplySuggestion(suggestion: LabelSuggestion): void {
     // Do nothing if the label is unchanged
-    if (this.label.value === this.config.data.currentLabel) {
+    if (suggestion.value === this.initialLabel && !suggestion.new) {
       this.ref.close();
       return;
     }
@@ -78,22 +105,18 @@ export class TorrentEditLabelDialogComponent {
     let prep$: Observable<void> = of(null)
 
     // If the label is not empty then check it is not one of the existing labels
-    if (this.label.value && this.label.new) {
-      prep$ = this.api.createLabel(this.label.value).pipe(
+    if (suggestion.value && suggestion.new) {
+      prep$ = this.api.createLabel(suggestion.value).pipe(
         // Deluge has issues when a torrent label is set immediately after setting it
         delay(200)
       )
     }
 
     prep$.pipe(
-      switchMap(_ => this.api.setTorrentLabel(this.id, {Label: this.label.value}))
+      switchMap(_ => this.api.setTorrentLabel(this.id, {Label: suggestion.value}))
     ).subscribe(
-      _ => this.ref.close(this.label.value)
+      _ => this.ref.close(suggestion.value)
     )
-  }
-
-  onClose(): void {
-    this.ref.close()
   }
 }
 
