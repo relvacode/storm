@@ -1,33 +1,33 @@
-<form (ngSubmit)="onSubmit()">
-  <div class="p-grid p-fluid">
-    <div class="p-field p-col-12">
-      <p-autoComplete name="label" field="value" appendTo="body" placeholder="Set torrent label"
-                      [(ngModel)]="label" (completeMethod)="onComplete($event)"
-                      [suggestions]="suggestions$ | async" [minLength]="0"
-                      [autofocus]="true" [dropdown]="true" dropdownMode="current" [autoHighlight]="true">
-        <ng-template let-suggestion pTemplate="item">
-          <ng-container
-            [ngTemplateOutlet]="suggestion.new ? createNewLabel : suggestion.clear ? clearCurrentLabel : useExistingLabel"
-            [ngTemplateOutletContext]="{$implicit: suggestion}"></ng-container>
-        </ng-template>
-      </p-autoComplete>
-    </div>
-  </div>
-
-  <div class="p-d-flex p-flex-row p-justify-between">
-    <button pButton label="Update" type="submit"></button>
-    <button pButton class="p-button-danger" label="Cancel" icon="fas fa-times" (click)="onClose()"></button>
-  </div>
-</form>
-
 <ng-template #useExistingLabel let-suggestion>
-  <span class="t-existing-label">{{suggestion.value}}</span>
+  <span class="t-existing-label">Use <b>{{suggestion.value}}</b></span>
+  <button pButton type=button (click)="onDeleteLabel($event, suggestion.value)" pTooltip="Delete this label"
+          icon="far fa-trash-alt" class="t-delete-label-button p-button-rounded p-button-text p-button-sm"></button>
 </ng-template>
 
 <ng-template #createNewLabel let-suggestion>
-  <span class="t-new-label">Create new label named <b>{{suggestion.value}}</b></span>
+  <span class="t-new-label">Create and use a new label named <b>{{suggestion.value}}</b></span>
 </ng-template>
 
 <ng-template #clearCurrentLabel>
-  <span class="t-new-label">Clear the current label</span>
+  <span class="t-new-label">Clear the current label <b>{{initialLabel}}</b></span>
 </ng-template>
+
+
+<div class="p-grid p-fluid">
+  <div class="p-field p-col-12">
+    <input pInputText autofocus [(ngModel)]="label" (ngModelChange)="query$.next($event)"
+           placeholder="Start typing a new label">
+  </div>
+
+  <div class="p-col-12">
+    <button *ngFor="let suggestion of suggestions$ | async"
+            class="p-button p-component p-d-flex p-flex-row p-justify-between t-suggestion-button" type="button"
+            (click)="onApplySuggestion(suggestion)">
+      <ng-container
+        [ngTemplateOutlet]="suggestion.new ? createNewLabel : suggestion.clear ? clearCurrentLabel : useExistingLabel"
+        [ngTemplateOutletContext]="{$implicit: suggestion}">
+      </ng-container>
+    </button>
+  </div>
+
+</div>
