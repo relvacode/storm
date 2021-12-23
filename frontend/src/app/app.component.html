@@ -24,15 +24,11 @@
   <t-torrent-search (search)="searchText = $event"></t-torrent-search>
 
   <t-breakpoint-overlay icon="fas fa-filter" [contentActivated]="(get$ | async) !== null" styleClass="t-filter-overlay">
-    <p-dropdown [options]="sortOptions"
+    <p-dropdown class="t-filter-input" [options]="sortOptions"
                 [(ngModel)]="sortByField" placeholder="Sort"></p-dropdown>
-    <p-dropdown [options]="filterStatesOptions"
+    <p-dropdown class="t-filter-input" [options]="filterStatesOptions"
                 (onChange)="get$.next($event.value)" placeholder="State"></p-dropdown>
-    <p-multiSelect [options]="filterLabelsOptions"
-                   [(ngModel)]="filterByLabel" optionLabel="label" optionValue="value" display="chip"></p-multiSelect>
   </t-breakpoint-overlay>
-
-
 </div>
 
 
@@ -54,7 +50,7 @@
     <div class="p-grid">
       <div class="p-col-12"
            *ngFor="let item of result | orderBy: sortByField; trackBy: trackBy">
-        <t-torrent [torrent]="item" [hash]="item.hash" [label]="item.label"></t-torrent>
+        <t-torrent [torrent]="item" [hash]="item.hash" [label]="item.Label"></t-torrent>
       </div>
     </div>
   </div>
