@@ -28,6 +28,8 @@
                 [(ngModel)]="sortByField" placeholder="Sort"></p-dropdown>
     <p-dropdown [options]="filterStatesOptions"
                 (onChange)="get$.next($event.value)" placeholder="State"></p-dropdown>
+    <p-multiSelect [options]="filterLabelsOptions"
+                   [(ngModel)]="filterByLabel" optionLabel="label" optionValue="value" display="chip"></p-multiSelect>
   </t-breakpoint-overlay>
 </div>
 
