@@ -11,6 +11,7 @@ import {switchMap, take} from 'rxjs/operators';
 export class TorrentComponent implements OnInit {
   @Input('hash') hash: string;
   @Input('torrent') torrent: Torrent;
+  @Input('label') label: string;
   @Output('removed') removed = new EventEmitter<boolean>();
 
   constructor(private api: ApiService) {

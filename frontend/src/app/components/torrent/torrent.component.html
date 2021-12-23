@@ -9,8 +9,9 @@
         <div class="p-card-title">
           {{torrent.Name}}
         </div>
-        <div class="p-card-subtitle">
+        <div class="p-card-subtitle t-torrent-detail">
           <t-torrent-state [state]="torrent.State"></t-torrent-state>
+          <t-torrent-label [hash]="hash" [label]="label"></t-torrent-label>
         </div>
       </div>
 

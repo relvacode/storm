@@ -1,0 +1,14 @@
+span {
+  &.t-label {
+    cursor: pointer;
+
+    & i {
+      font-size: .6rem;
+      vertical-align: middle;
+
+      &:not(:only-child) {
+        margin-right: 8px;
+      }
+    }
+  }
+}

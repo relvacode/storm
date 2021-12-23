@@ -1,7 +1,7 @@
 import {Inject, Injectable} from '@angular/core';
 import {Observable, ObservableInput, throwError} from 'rxjs';
 import {HttpClient, HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpParams, HttpRequest} from '@angular/common/http';
-import {catchError} from 'rxjs/operators';
+import {catchError, map} from 'rxjs/operators';
 import {Message} from 'primeng/api';
 import {Environment, ENVIRONMENT} from "./environment";
 
@@ -96,6 +96,14 @@ export interface AddTorrentResponse {
   ID: string;
 }
 
+export interface TorrentLabels {
+  [id: string]: string;
+}
+
+export interface SetTorrentLabelRequest {
+  Label: string;
+}
+
 export class ApiInterceptor implements HttpInterceptor {
   constructor() {
   }
@@ -120,6 +128,31 @@ export class ApiService {
 
   private url(endpoint: string): string {
     return `${this.environment.baseApiPath}${endpoint}`;
+  }
+
+  /**
+   * Get a list of all the currently enabled plugins
+   */
+  public plugins(): Observable<string[]> {
+    return this.http.get<string[]>(this.url('plugins'))
+  }
+
+  /**
+   * Enable a plugin
+   * @param name
+   * The plugin name to enable
+   */
+  public enablePlugin(name: string): Observable<void> {
+    return this.http.post<void>(this.url(`plugins/${name}`), null)
+  }
+
+  /**
+   * Disable a plugin
+   * @param name
+   * The plugin name to disable
+   */
+  public disablePlugin(name: string): Observable<void> {
+    return this.http.delete<void>(this.url(`plugins/${name}`))
   }
 
   /**
@@ -199,5 +232,43 @@ export class ApiService {
    */
   public add(req: AddTorrentRequest): Observable<AddTorrentResponse> {
     return this.http.post<AddTorrentResponse>(this.url('torrents'), req);
+  }
+
+  /**
+   * Gets available labels
+   */
+  public labels(): Observable<string[]> {
+    return this.http.get<string[]>(this.url('labels'))
+  }
+
+  /**
+   * Create a new label
+   * @param name
+   * The label name
+   */
+  public createLabel(name: string): Observable<void> {
+    return this.http.post<void>(this.url(`labels/${name}`), null)
+  }
+
+  /**
+   * Gets labels associated with torrents matching filter
+   * @param state
+   * The torrent state
+   * @param torrents
+   * An optional set of torrent IDs
+   */
+  public torrentsLabels(state?: State, ...torrents: string[]): Observable<TorrentLabels> {
+    return this.http.get<TorrentLabels>(this.url('torrents/labels'))
+  }
+
+  /**
+   * Updates the label of a torrent
+   * @param id
+   * The torrent ID
+   * @param req
+   * Request data
+   */
+  public setTorrentLabel(id: string, req: SetTorrentLabelRequest): Observable<void> {
+    return this.http.post<void>(this.url(`torrent/${id}/label`), req)
   }
 }

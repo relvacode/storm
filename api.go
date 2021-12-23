@@ -204,6 +204,21 @@ func (api *Api) bind() {
 
 	router.
 		Methods(http.MethodGet).
+		Path("/plugins").
+		HandlerFunc(api.DelugeHandler(httpGetPlugins))
+
+	router.
+		Methods(http.MethodPost).
+		Path("/plugins/{id}").
+		HandlerFunc(api.DelugeHandler(httpEnablePlugin))
+
+	router.
+		Methods(http.MethodDelete).
+		Path("/plugins/{id}").
+		HandlerFunc(api.DelugeHandler(httpDisablePlugin))
+
+	router.
+		Methods(http.MethodGet).
 		Path("/torrents").
 		HandlerFunc(api.DelugeHandler(httpTorrentsStatus))
 	router.
@@ -243,6 +258,31 @@ func (api *Api) bind() {
 		Methods(http.MethodPost).
 		Path("/torrent/{id}/resume").
 		HandlerFunc(api.DelugeHandler(TorrentHandler(httpResumeTorrent)))
+
+	router.
+		Methods(http.MethodGet).
+		Path("/labels").
+		HandlerFunc(api.DelugeHandler(httpLabels))
+
+	router.
+		Methods(http.MethodPost).
+		Path("/labels/{id}").
+		HandlerFunc(api.DelugeHandler(httpCreateLabel))
+
+	router.
+		Methods(http.MethodDelete).
+		Path("/labels/{id}").
+		HandlerFunc(api.DelugeHandler(httpDeleteLabel))
+
+	router.
+		Methods(http.MethodGet).
+		Path("/torrents/labels").
+		HandlerFunc(api.DelugeHandler(httpTorrentsLabels))
+
+	router.
+		Methods(http.MethodPost).
+		Path("/torrent/{id}/label").
+		HandlerFunc(api.DelugeHandler(TorrentHandler(httpSetTorrentLabel)))
 
 	// Static files
 	api.bindStatic(primaryRouter)

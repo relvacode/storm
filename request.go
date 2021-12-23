@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	// MaxRequest size is the maximum allowed request size in bytes
+	// MaxRequestSize is the maximum allowed request size in bytes
 	MaxRequestSize = 5 << 20
 )
 

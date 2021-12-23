@@ -11,7 +11,7 @@ require (
 )
 
 require (
-	github.com/gdm85/go-rencode v0.1.6 // indirect
+	github.com/gdm85/go-rencode v0.1.8 // indirect
 	github.com/stretchr/testify v1.5.1 // indirect
 	go.uber.org/atomic v1.6.0 // indirect
 	go.uber.org/multierr v1.5.0 // indirect
@@ -19,3 +19,5 @@ require (
 	golang.org/x/tools v0.0.0-20200308013534-11ec41452d41 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
+
+replace github.com/gdm85/go-libdeluge => ../go-libdeluge
