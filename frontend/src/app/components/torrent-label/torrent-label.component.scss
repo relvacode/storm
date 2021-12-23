@@ -1,21 +1,14 @@
-div.t-label {
-  cursor: pointer;
-  display: inline;
+span {
+  &.t-label {
+    cursor: pointer;
 
-  &.no-label {
-    opacity: .4;
-  }
+    & i {
+      font-size: .6rem;
+      vertical-align: middle;
 
-  & .t-label-no-label {
-    font-style: italic;
-  }
-
-  & i {
-    font-size: .6rem;
-    vertical-align: middle;
-
-    &:not(:only-child) {
-      margin-right: 6px;
+      &:not(:only-child) {
+        margin-right: 8px;
+      }
     }
   }
 }

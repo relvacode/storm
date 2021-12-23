@@ -1,9 +1,4 @@
-<div class="t-label" [class.no-label]="!label" pTooltip="Torrent Label" (click)="onUpdateLabel()">
+<span class="t-label" pTooltip="Torrent Label" (click)="onUpdateLabel()">
   <i class="fas fa-tag"></i>
-  <span *ngIf="label else noLabel">{{label}}</span>
-</div>
-
-
-<ng-template #noLabel>
-  <span class="t-label-no-label">no label</span>
-</ng-template>
+  <span *ngIf="label">{{label}}</span>
+</span>

@@ -44,13 +44,10 @@ import {TorrentSearchPipe} from './torrent-search.pipe';
 import {ConnectivityStatusComponent} from './components/connectivity-status/connectivity-status.component';
 import {TorrentSearchComponent} from './components/torrent-search/torrent-search.component';
 import {ENVIRONMENT} from "./environment";
-import {TorrentLabelComponent} from './components/torrent-label/torrent-label.component';
-import {
-  TorrentEditLabelDialogComponent
-} from './components/torrent-edit-label-dialog/torrent-edit-label-dialog.component';
-import {PluginEnableComponent} from './components/plugin-enable/plugin-enable.component';
-import {MultiSelectModule} from "primeng/multiselect";
-import { ActivityMarkerComponent } from './components/activity-marker/activity-marker.component';
+import { TorrentLabelComponent } from './components/torrent-label/torrent-label.component';
+import { TorrentEditLabelDialogComponent } from './components/torrent-edit-label-dialog/torrent-edit-label-dialog.component';
+import {AutoCompleteModule} from "primeng/autocomplete";
+import { PluginEnableComponent } from './components/plugin-enable/plugin-enable.component';
 
 // @ts-ignore
 @NgModule({
@@ -73,7 +70,6 @@ import { ActivityMarkerComponent } from './components/activity-marker/activity-m
     TorrentLabelComponent,
     TorrentEditLabelDialogComponent,
     PluginEnableComponent,
-    ActivityMarkerComponent,
   ],
   imports: [
     BrowserModule,
@@ -98,7 +94,7 @@ import { ActivityMarkerComponent } from './components/activity-marker/activity-m
     CheckboxModule,
     MessagesModule,
     FileUploadModule,
-    MultiSelectModule,
+    AutoCompleteModule,
   ],
   entryComponents: [],
   providers: [

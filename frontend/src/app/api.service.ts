@@ -251,15 +251,6 @@ export class ApiService {
   }
 
   /**
-   * Delete an existing label
-   * @param name
-   * The label name
-   */
-  public deleteLabel(name: string): Observable<void> {
-    return this.http.delete<void>(this.url(`labels/${name}`))
-  }
-
-  /**
    * Gets labels associated with torrents matching filter
    * @param state
    * The torrent state

@@ -6,12 +6,12 @@ import {SelectItem} from 'primeng/api';
 import {FocusService} from './focus.service';
 import {DialogService} from "primeng/dynamicdialog";
 import {PluginEnableComponent} from "./components/plugin-enable/plugin-enable.component";
-import {LabelledTorrent} from "./torrent-search.pipe";
 
 type OptionalState = State | null;
 
 interface HashedTorrent extends LabelledTorrent {
   hash: string;
+  label: string;
 }
 
 @Component({
@@ -227,7 +227,7 @@ export class AppComponent implements OnInit {
    */
   private transformResponse(response: { torrents: Torrents, labels: TorrentLabels }): HashedTorrent[] {
     return Object.entries(response.torrents).map(
-      ([key, value]) => <HashedTorrent>Object.assign({hash: key, Label: response.labels[key] || ''}, value)
+      ([key, value]) => <HashedTorrent>Object.assign({hash: key, label: response.labels[key]}, value)
     );
   }
 
