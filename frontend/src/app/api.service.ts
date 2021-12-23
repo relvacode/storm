@@ -1,9 +1,19 @@
 import {Inject, Injectable} from '@angular/core';
-import {Observable, ObservableInput, throwError} from 'rxjs';
-import {HttpClient, HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpParams, HttpRequest} from '@angular/common/http';
-import {catchError, map} from 'rxjs/operators';
+import {BehaviorSubject, defer, Observable, ObservableInput, of, throwError} from 'rxjs';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpEvent,
+  HttpHandler,
+  HttpInterceptor,
+  HttpParams,
+  HttpRequest
+} from '@angular/common/http';
+import {catchError, map, retryWhen, switchMap, takeWhile} from 'rxjs/operators';
 import {Message} from 'primeng/api';
 import {Environment, ENVIRONMENT} from "./environment";
+import {DialogService} from "primeng/dynamicdialog";
+import {ApiKeyDialogComponent} from "./components/api-key-dialog/api-key-dialog.component";
 
 /**
  * Raised when the API returns an error
@@ -24,7 +34,16 @@ export class ApiException {
   }
 }
 
-export type State = 'Active' | 'Allocating' | 'Checking' | 'Downloading' | 'Seeding' | 'Paused' | 'Error' | 'Queued' | 'Moving';
+export type State =
+  'Active'
+  | 'Allocating'
+  | 'Checking'
+  | 'Downloading'
+  | 'Seeding'
+  | 'Paused'
+  | 'Error'
+  | 'Queued'
+  | 'Moving';
 
 export interface Torrent {
   ActiveTime: number;
@@ -119,8 +138,53 @@ export class ApiInterceptor implements HttpInterceptor {
   }
 }
 
+@Injectable()
+export class AuthInterceptor implements HttpInterceptor {
+  ask$: Observable<void>;
+
+  constructor(dialogService: DialogService) {
+    this.ask$ = defer(() => {
+      const ref = dialogService.open(ApiKeyDialogComponent, {
+        header: 'Authorization Required',
+        showHeader: true,
+        closeOnEscape: false,
+        closable: false,
+      })
+
+      return ref.onClose
+    });
+  }
+
+  public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    return next.handle(req).pipe(
+      // Catch 401 errors and ask for the API key.
+      // Redo the request with the provided API key in basic auth headers
+      catchError((err: ApiException) => {
+        if (err.status != 401) {
+          return throwError(err)
+        }
+
+        return this.ask$.pipe(
+          switchMap(key => {
+            const withAuthHeaderReq = req.clone({
+              headers: req.headers.set('Authorization', 'Basic ' + btoa(':' + key))
+            });
+
+            return next.handle(withAuthHeaderReq)
+          })
+        )
+      }),
+
+      // Keep retrying 401 errors
+      retryWhen(errors => errors.pipe(
+        takeWhile((err: ApiException) => err.status === 401)
+      ))
+    )
+  }
+}
+
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApiService {
   constructor(private http: HttpClient, @Inject(ENVIRONMENT) private environment: Environment) {
@@ -128,6 +192,13 @@ export class ApiService {
 
   private url(endpoint: string): string {
     return `${this.environment.baseApiPath}${endpoint}`;
+  }
+
+  /**
+   * Calls the ping endpoint
+   */
+  public ping(): Observable<void> {
+    return this.http.get<void>(this.url('ping'))
   }
 
   /**

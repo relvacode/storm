@@ -71,5 +71,9 @@ func SendError(rw http.ResponseWriter, err error) {
 		code = httpError.StatusCode()
 	}
 
+	if wr, ok := rw.(*WrappedResponse); ok {
+		wr.error = err
+	}
+
 	Send(rw, code, &response)
 }

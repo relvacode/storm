@@ -1,0 +1,11 @@
+<form (ngSubmit)="onSubmit()">
+  <div class="p-grid p-fluid">
+    <div class="p-field p-col-12">
+      <input #input="ngModel" pInputText type="password" placeholder="Enter API Key" required autofocus [(ngModel)]="key" >
+    </div>
+  </div>
+
+  <div class="p-d-flex p-flex-row p-justify-between">
+    <button pButton class="p-button-success" type="submit" [disabled]="!input.valid">Submit</button>
+  </div>
+</form>
