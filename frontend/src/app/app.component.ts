@@ -80,6 +80,9 @@ export class AppComponent implements OnInit {
     }
   ];
 
+  filterLabelsOptions: SelectItem<string>[] = [];
+  filterByLabel: string[] = [];
+
   searchText: string;
 
   // All torrent hashes within the current view
@@ -168,6 +171,7 @@ export class AppComponent implements OnInit {
       tap(response => this.empty = !this.tapEmptyView(response.torrents)),
       tap(response => this.stateInView = this.tapStateInView(response.torrents)),
       tap(response => this.hashesInView = this.tapHashesInView(response.torrents)),
+      tap(response => this.filterLabelsOptions = this.tapTorrentLabelsInView(response.labels)),
 
       map(response => this.transformResponse(response)),
     ).subscribe(
@@ -221,13 +225,42 @@ export class AppComponent implements OnInit {
   }
 
   /**
+   * Transforms the mapping of torrent to labels into a distinct set of select options
+   * @param response
+   * Mapping of torrent labels in view
+   * @private
+   */
+  private tapTorrentLabelsInView(response: TorrentLabels): SelectItem<string>[] {
+    const labels = new Set<string>();
+    for (const label of Object.values(response)) {
+      labels.add(label)
+    }
+
+    const selectOptions: SelectItem<string>[] = [
+      {
+        title: 'Any',
+        value: ''
+      }
+    ];
+
+    for (const label of labels.values()) {
+      selectOptions.push({
+        title: label,
+        value: label,
+      })
+    }
+
+    return selectOptions
+  }
+
+  /**
    * Transforms an API hash-map of torrents to an array of HashedTorrent
    * @param response
    * Response from API
    */
   private transformResponse(response: { torrents: Torrents, labels: TorrentLabels }): HashedTorrent[] {
     return Object.entries(response.torrents).map(
-      ([key, value]) => <HashedTorrent>Object.assign({hash: key, label: response.labels[key]}, value)
+      ([key, value]) => <HashedTorrent>Object.assign({hash: key, label: response.labels[key] || ''}, value)
     );
   }
 

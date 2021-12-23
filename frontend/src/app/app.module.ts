@@ -49,6 +49,7 @@ import {
   TorrentEditLabelDialogComponent
 } from './components/torrent-edit-label-dialog/torrent-edit-label-dialog.component';
 import {PluginEnableComponent} from './components/plugin-enable/plugin-enable.component';
+import {MultiSelectModule} from "primeng/multiselect";
 
 // @ts-ignore
 @NgModule({
@@ -95,6 +96,7 @@ import {PluginEnableComponent} from './components/plugin-enable/plugin-enable.co
     CheckboxModule,
     MessagesModule,
     FileUploadModule,
+    MultiSelectModule,
   ],
   entryComponents: [],
   providers: [
