@@ -1,5 +1,5 @@
 import {Inject, Injectable} from '@angular/core';
-import {BehaviorSubject, defer, Observable, ObservableInput, of, throwError} from 'rxjs';
+import {defer, Observable, ObservableInput, throwError} from 'rxjs';
 import {
   HttpClient,
   HttpErrorResponse,
@@ -9,7 +9,7 @@ import {
   HttpParams,
   HttpRequest
 } from '@angular/common/http';
-import {catchError, map, retryWhen, switchMap, takeWhile} from 'rxjs/operators';
+import {catchError, retryWhen, switchMap, takeWhile} from 'rxjs/operators';
 import {Message} from 'primeng/api';
 import {Environment, ENVIRONMENT} from "./environment";
 import {DialogService} from "primeng/dynamicdialog";
