@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 const (
@@ -51,7 +52,6 @@ type Api struct {
 	log    *zap.Logger
 	router *mux.Router
 }
-
 
 func (api *Api) DelugeHandler(f DelugeMethod) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
@@ -185,7 +185,6 @@ func (api *Api) keyFromRequest(r *http.Request) (string, bool) {
 	return string(fromCookieDecoded), true
 }
 
-
 // logForRequest takes a WrappedResponse and an incoming HTTP request and logs it
 func (api *Api) logForRequest(rw *WrappedResponse, r *http.Request) {
 	logger := api.log.With(
@@ -243,6 +242,7 @@ func (api *Api) httpMiddlewareAuthenticate(next http.Handler) http.Handler {
 				Name:     ApiAuthCookieName,
 				Value:    base64.StdEncoding.EncodeToString([]byte(apiKey)),
 				Path:     fmt.Sprintf("%s/api", api.pathPrefix),
+				Expires:  time.Now().Add(time.Hour * 24 * 365),
 				SameSite: http.SameSiteStrictMode,
 				HttpOnly: true,
 			})
