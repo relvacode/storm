@@ -3,7 +3,7 @@ module github.com/relvacode/storm
 go 1.17
 
 require (
-	github.com/gdm85/go-libdeluge v0.5.4
+	github.com/gdm85/go-libdeluge v0.5.6
 	github.com/gorilla/mux v1.8.0
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/spf13/afero v1.6.0
@@ -19,5 +19,3 @@ require (
 	golang.org/x/tools v0.0.0-20200308013534-11ec41452d41 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
-
-replace github.com/gdm85/go-libdeluge => ../go-libdeluge
