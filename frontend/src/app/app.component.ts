@@ -1,13 +1,16 @@
 import {Component, OnInit} from '@angular/core';
-import {BehaviorSubject, combineLatest, EMPTY, Observable, of, throwError, timer} from 'rxjs';
-import {catchError, filter, map, mergeMap, onErrorResumeNext, retry, switchMap, tap} from 'rxjs/operators';
-import {ApiService, State, Torrent, Torrents} from './api.service';
+import {BehaviorSubject, combineLatest, EMPTY, forkJoin, Observable, of, timer} from 'rxjs';
+import {catchError, filter, map, mergeMap, switchMap, tap} from 'rxjs/operators';
+import {ApiService, State, Torrent, TorrentLabels, Torrents} from './api.service';
 import {SelectItem} from 'primeng/api';
 import {FocusService} from './focus.service';
+import {DialogService} from "primeng/dynamicdialog";
+import {PluginEnableComponent} from "./components/plugin-enable/plugin-enable.component";
+import {LabelledTorrent} from "./torrent-search.pipe";
 
 type OptionalState = State | null;
 
-interface HashedTorrent extends Torrent {
+interface HashedTorrent extends LabelledTorrent {
   hash: string;
 }
 
@@ -89,13 +92,33 @@ export class AppComponent implements OnInit {
 
   connected = true;
 
-  $get: BehaviorSubject<OptionalState>;
+  get$: BehaviorSubject<OptionalState>;
 
-  constructor(private api: ApiService, private focus: FocusService) {
-    this.$get = new BehaviorSubject<OptionalState>(null);
+  constructor(private api: ApiService, private focus: FocusService, private dialogService: DialogService) {
+    this.get$ = new BehaviorSubject<OptionalState>(null);
     this.refreshInterval(2000);
   }
 
+
+  /**
+   * Opens the PluginEnable dialog component
+   * @private
+   */
+  private enableLabelPlugin(): Observable<void> {
+    const ref = this.dialogService.open(PluginEnableComponent, {
+      header: 'Enable Plugin',
+      showHeader: false,
+      closable: false,
+      closeOnEscape: false,
+      dismissableMask: false,
+      styleClass: 't-dialog-responsive',
+      data: {
+        name: 'Label'
+      }
+    });
+
+    return ref.onClose
+  }
 
   /**
    * Updates the list of torrents at every given interval,
@@ -104,25 +127,47 @@ export class AppComponent implements OnInit {
    * Update interval in milliseconds
    */
   private refreshInterval(interval: number): void {
-    const $timer = timer(0, interval);
+    const timer$ = timer(0, interval);
 
-    const $interval = combineLatest([$timer, this.focus.observe, this.$get]);
-    $interval.pipe(
+    // Ensure the label plugin is enabled
+    const labelPluginEnabled$ = this.api.plugins().pipe(
+      switchMap(plugins => {
+        const ok = plugins.findIndex(name => name === 'Label') > -1;
+        if (ok) {
+          return of(true)
+        }
+
+        return this.enableLabelPlugin()
+      })
+    )
+
+    const interval$ = combineLatest([timer$, this.focus.observe, this.get$, labelPluginEnabled$]);
+
+    interval$.pipe(
       // Continue only when in focus
-      filter(([_, focus, state]) => focus),
+      filter(([_, focus, state, pluginEnabled]) => focus),
 
       // Switch to API response of torrents
-      mergeMap(([_, focus, state]) => this.api.torrents(state).pipe(
-        catchError(() => {
-          this.connected = false;
-          return EMPTY;
-        }),
-      )),
+      mergeMap(([_, focus, state]) => {
+        const torrents$ = this.api.torrents(state).pipe(
+          catchError(() => {
+            this.connected = false;
+            return EMPTY;
+          }),
+        )
+
+        const labels$ = this.api.torrentsLabels(state)
+
+        return forkJoin({
+          torrents: torrents$,
+          labels: labels$,
+        })
+      }),
 
       // Tap view information
-      tap(response => this.empty = !this.tapEmptyView(response)),
-      tap(response => this.stateInView = this.tapStateInView(response)),
-      tap(response => this.hashesInView = this.tapHashesInView(response)),
+      tap(response => this.empty = !this.tapEmptyView(response.torrents)),
+      tap(response => this.stateInView = this.tapStateInView(response.torrents)),
+      tap(response => this.hashesInView = this.tapHashesInView(response.torrents)),
 
       map(response => this.transformResponse(response)),
     ).subscribe(
@@ -180,9 +225,9 @@ export class AppComponent implements OnInit {
    * @param response
    * Response from API
    */
-  private transformResponse(response: Torrents): HashedTorrent[] {
-    return Object.entries(response).map(
-      ([key, value]) => Object.assign({hash: key}, value)
+  private transformResponse(response: { torrents: Torrents, labels: TorrentLabels }): HashedTorrent[] {
+    return Object.entries(response.torrents).map(
+      ([key, value]) => <HashedTorrent>Object.assign({hash: key, Label: response.labels[key] || ''}, value)
     );
   }
 

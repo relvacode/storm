@@ -1,0 +1,6 @@
+<p>The Deluge plugin <b>{{name}}</b> must be enabled to continue</p>
+
+<div class="p-d-flex p-flex-row p-justify-between">
+  <button pButton [label]="inProgress ? 'Enabling...' : 'Enable'" type="button" [disabled]="inProgress"
+          (click)="onSubmit()" class="p-button-success"></button>
+</div>

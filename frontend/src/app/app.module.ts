@@ -22,22 +22,35 @@ import {MomentModule} from 'ngx-moment';
 import {MenuModule} from 'primeng/menu';
 import {AddTorrentMenuComponent} from './components/add-torrent-menu/add-torrent-menu.component';
 import {DialogService, DynamicDialogModule} from 'primeng/dynamicdialog';
-import {AddTorrentMagnetInputComponent} from './components/add-torrent-menu/add-torrent-magnet-input/add-torrent-magnet-input.component';
+import {
+  AddTorrentMagnetInputComponent
+} from './components/add-torrent-menu/add-torrent-magnet-input/add-torrent-magnet-input.component';
 import {InputTextModule} from 'primeng/inputtext';
 import {AddTorrentConfigComponent} from './components/add-torrent-menu/add-torrent-config/add-torrent-config.component';
 import {AccordionModule} from 'primeng/accordion';
 import {InputNumberModule} from 'primeng/inputnumber';
 import {CheckboxModule} from 'primeng/checkbox';
 import {TorrentDetailsDialogComponent} from './components/torrent-details-dialog/torrent-details-dialog.component';
-import {AddTorrentUrlInputComponent} from './components/add-torrent-menu/add-torrent-url-input/add-torrent-url-input.component';
+import {
+  AddTorrentUrlInputComponent
+} from './components/add-torrent-menu/add-torrent-url-input/add-torrent-url-input.component';
 import {MessagesModule} from 'primeng/messages';
-import {AddTorrentFileInputComponent} from './components/add-torrent-menu/add-torrent-file-input/add-torrent-file-input.component';
+import {
+  AddTorrentFileInputComponent
+} from './components/add-torrent-menu/add-torrent-file-input/add-torrent-file-input.component';
 import {FileUploadModule} from 'primeng/fileupload';
 import {BreakpointOverlayComponent} from './components/breakpoint-overlay/breakpoint-overlay.component';
-import { TorrentSearchPipe } from './torrent-search.pipe';
-import { ConnectivityStatusComponent } from './components/connectivity-status/connectivity-status.component';
-import { TorrentSearchComponent } from './components/torrent-search/torrent-search.component';
+import {TorrentSearchPipe} from './torrent-search.pipe';
+import {ConnectivityStatusComponent} from './components/connectivity-status/connectivity-status.component';
+import {TorrentSearchComponent} from './components/torrent-search/torrent-search.component';
 import {ENVIRONMENT} from "./environment";
+import {TorrentLabelComponent} from './components/torrent-label/torrent-label.component';
+import {
+  TorrentEditLabelDialogComponent
+} from './components/torrent-edit-label-dialog/torrent-edit-label-dialog.component';
+import {PluginEnableComponent} from './components/plugin-enable/plugin-enable.component';
+import {MultiSelectModule} from "primeng/multiselect";
+import { ActivityMarkerComponent } from './components/activity-marker/activity-marker.component';
 
 // @ts-ignore
 @NgModule({
@@ -57,6 +70,10 @@ import {ENVIRONMENT} from "./environment";
     TorrentSearchPipe,
     ConnectivityStatusComponent,
     TorrentSearchComponent,
+    TorrentLabelComponent,
+    TorrentEditLabelDialogComponent,
+    PluginEnableComponent,
+    ActivityMarkerComponent,
   ],
   imports: [
     BrowserModule,
@@ -81,6 +98,7 @@ import {ENVIRONMENT} from "./environment";
     CheckboxModule,
     MessagesModule,
     FileUploadModule,
+    MultiSelectModule,
   ],
   entryComponents: [],
   providers: [

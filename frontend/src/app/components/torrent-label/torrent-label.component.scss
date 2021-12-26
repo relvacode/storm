@@ -1,0 +1,21 @@
+div.t-label {
+  cursor: pointer;
+  display: inline;
+
+  &.no-label {
+    opacity: .4;
+  }
+
+  & .t-label-no-label {
+    font-style: italic;
+  }
+
+  & i {
+    font-size: .6rem;
+    vertical-align: middle;
+
+    &:not(:only-child) {
+      margin-right: 6px;
+    }
+  }
+}

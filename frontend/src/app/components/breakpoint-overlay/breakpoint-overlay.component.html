@@ -9,7 +9,7 @@
 
 
   <button pButton pRipple (click)="panel.toggle($event)" type="button" [icon]="icon"></button>
-  <span class="t-activity-marker" *ngIf="contentActivated"></span>
+  <t-activity-marker *ngIf="contentActivated"></t-activity-marker>
 </div>
 
 <ng-template #content>
