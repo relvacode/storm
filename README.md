@@ -52,8 +52,15 @@ Then you can use the following environment variables to configure Storm
 | `DELUGE_RPC_USERNAME` | The username from Deluge auth |
 | `DELUGE_RPC_PASSWORD` | The password from Deluge auth |
 | `DELUGE_RPC_VERSION` | `v1` or `v2` depending on your Deluge version |
+| `STORM_API_KEY` | Enable authentication for the Storm API |
 | `STORM_BASE_PATH` | Set the base URL path. Defaults to `/` |
 
-__Important__
+##### Security
 
-Storm does not come with authentication built-in. It is highly recommended you use a proxy container like [oauth2-proxy](https://github.com/oauth2-proxy/oauth2-proxy) or NGINX with basic auth credentials to provide authentication when serving Storm over the internet.
+By default, Storm does not authenticate requests made to the API. When serving Storm over the public internet you should ensure access to your Deluge daemon is properly secured.
+
+Storm comes with a simple built-in authentication mechanism which can be enabled with the environment variable `STORM_API_KEY` or the command-line option `--api-key`.
+
+Set this to a reasonably secure password. Any requests made to Storm must now provide the API key in the request.
+
+You should also seriously consider the use of HTTPS over the internet, with services like LetsEncrypt it's relatively easy to get a valid SSL certificate for free.

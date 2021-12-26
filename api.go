@@ -1,6 +1,8 @@
 package storm
 
 import (
+	"crypto/subtle"
+	"encoding/base64"
 	"fmt"
 	deluge "github.com/gdm85/go-libdeluge"
 	"github.com/gorilla/mux"
@@ -12,6 +14,11 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
+)
+
+const (
+	ApiAuthCookieName = "storm-api-key"
 )
 
 func appendSuffix(s, suffix string) string {
@@ -22,10 +29,11 @@ func appendSuffix(s, suffix string) string {
 	return fmt.Sprint(s, suffix)
 }
 
-func New(log *zap.Logger, pool *ConnectionPool, pathPrefix string) *Api {
+func New(log *zap.Logger, pool *ConnectionPool, pathPrefix string, apiKey string) *Api {
 	api := &Api{
 		pool:       pool,
 		pathPrefix: strings.TrimSuffix(pathPrefix, "/"),
+		apiKey:     apiKey,
 		log:        log,
 		router:     mux.NewRouter(),
 	}
@@ -39,79 +47,49 @@ func New(log *zap.Logger, pool *ConnectionPool, pathPrefix string) *Api {
 type Api struct {
 	pool       *ConnectionPool
 	pathPrefix string
+	apiKey     string
 
 	log    *zap.Logger
 	router *mux.Router
 }
 
-// logRequest returns a logging function attached to a logger set at the correct level and fields
-// for the given wrapped response, request and handler error.
-func (api *Api) logRequest(rw *ResponseWriter, r *http.Request, err error) func(string, ...zap.Field) {
-	logger := api.log.With(
-		zap.String("Method", r.Method),
-		zap.String("URL", r.URL.String()),
-		zap.String("RemoteAddr", r.RemoteAddr),
-		zap.Time("Time", rw.Started()),
-		zap.Int("StatusCode", rw.code),
-		zap.Int("ResponseSize", rw.Len()),
-		zap.Duration("Duration", rw.Duration()),
-	)
-
-	if err == nil {
-		return logger.Info
-	}
-
-	return logger.With(zap.Error(err)).Error
-}
-
-// Handle constructs a http.HandlerFunc that calls a handler,
-// responds to the client based on the result of the handler call,
-// and logs the result to the Api logger.
-func (api *Api) Handle(handler HandlerFunc) http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {
-		var (
-			wrapped = WrapResponse(rw)
-			err     = Handle(rw, r, handler)
-			log     = api.logRequest(wrapped, r, err)
-		)
-
-		log(http.StatusText(wrapped.Code()))
-	}
-}
-
 func (api *Api) DelugeHandler(f DelugeMethod) http.HandlerFunc {
-	return api.Handle(func(r *http.Request) (interface{}, error) {
-		conn, err := api.pool.Get(r.Context())
-		if err != nil {
-			return nil, err
-		}
-
-		ret, err := f(conn, r)
-		api.pool.Put(conn)
-
-		switch t := err.(type) {
-		case deluge.RPCError:
-			err = RPCError{
-				ExceptionType:    t.ExceptionType,
-				ExceptionMessage: t.ExceptionMessage,
+	return func(rw http.ResponseWriter, r *http.Request) {
+		_ = Handle(rw, r, func(r *http.Request) (interface{}, error) {
+			conn, err := api.pool.Get(r.Context())
+			if err != nil {
+				return nil, err
 			}
-		}
 
-		return ret, err
-	})
+			ret, err := f(conn, r)
+			api.pool.Put(conn)
+
+			switch t := err.(type) {
+			case deluge.RPCError:
+				err = RPCError{
+					ExceptionType:    t.ExceptionType,
+					ExceptionMessage: t.ExceptionMessage,
+				}
+			}
+
+			return ret, err
+		})
+	}
 }
 
 func (api *Api) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	api.router.ServeHTTP(rw, r)
 }
 
-// httpNotFound implements an http.Handler that returns a not found error message.
+// httpNotFound implements http.Handler which returns a not found error message.
 func (api *Api) httpNotFound() http.Handler {
-	return api.Handle(func(r *http.Request) (interface{}, error) {
-		return nil, &Error{
-			Message: "Not found",
-			Code:    http.StatusNotFound,
-		}
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		_ = Handle(rw, r, func(r *http.Request) (interface{}, error) {
+			return nil, &Error{
+				Message: "Not found",
+				Code:    http.StatusNotFound,
+			}
+		})
 	})
 }
 
@@ -185,7 +163,93 @@ func (api *Api) bindStatic(router *mux.Router) {
 	}
 
 	router.Methods(http.MethodGet).Handler(fileServer)
+}
 
+// keyFromRequest attempts to locate the API key from the incoming request.
+// It looks for the key using these methods in the following order:
+// 		 - The password component of a Basic auth header
+//		 - The cookie value ApiAuthCookieName as a base64 encoded value
+func (api *Api) keyFromRequest(r *http.Request) (string, bool) {
+	_, password, ok := r.BasicAuth()
+	if ok {
+		return password, false
+	}
+
+	fromCookie, err := r.Cookie(ApiAuthCookieName)
+	if err != nil {
+		return "", false
+	}
+
+	fromCookieDecoded, _ := base64.StdEncoding.DecodeString(fromCookie.Value)
+
+	return string(fromCookieDecoded), true
+}
+
+// logForRequest takes a WrappedResponse and an incoming HTTP request and logs it
+func (api *Api) logForRequest(rw *WrappedResponse, r *http.Request) {
+	logger := api.log.With(
+		zap.String("Method", r.Method),
+		zap.String("URL", r.URL.String()),
+		zap.String("RemoteAddr", r.RemoteAddr),
+		zap.Time("Time", rw.Started()),
+		zap.Int("StatusCode", rw.code),
+		zap.Int("ResponseSize", rw.Len()),
+		zap.Duration("Duration", rw.Duration()),
+	)
+
+	var logLevelFunc = logger.Info
+
+	if rw.error != nil {
+		logLevelFunc = logger.With(zap.Error(rw.error)).Error
+	}
+
+	logLevelFunc(http.StatusText(rw.code))
+}
+
+func (api *Api) httpMiddlewareLog(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		wr := WrapResponse(rw)
+
+		next.ServeHTTP(wr, r)
+
+		api.logForRequest(wr, r)
+	})
+}
+
+func (api *Api) httpMiddlewareAuthenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		apiKey, fromCookie := api.keyFromRequest(r)
+		if apiKey == "" {
+			SendError(rw, &Error{
+				Code:    http.StatusUnauthorized,
+				Message: "No authentication provided in request",
+			})
+			return
+		}
+
+		ok := subtle.ConstantTimeCompare([]byte(api.apiKey), []byte(apiKey)) == 1
+		if !ok {
+			SendError(rw, &Error{
+				Code:    http.StatusUnauthorized,
+				Message: "Incorrect API key",
+			})
+			return
+		}
+
+		// If the request didn't originate from a cookie, then set the cookie
+		if !fromCookie {
+			http.SetCookie(rw, &http.Cookie{
+				Name:     ApiAuthCookieName,
+				Value:    base64.StdEncoding.EncodeToString([]byte(apiKey)),
+				Path:     fmt.Sprintf("%s/api", api.pathPrefix),
+				Expires:  time.Now().Add(time.Hour * 24 * 365),
+				SameSite: http.SameSiteStrictMode,
+				HttpOnly: true,
+			})
+		}
+
+		next.ServeHTTP(rw, r)
+	})
 }
 
 func (api *Api) bind() {
@@ -202,84 +266,99 @@ func (api *Api) bind() {
 		rw.WriteHeader(http.StatusOK)
 	})
 
-	router.
+	apiRouter := router.NewRoute().Subrouter()
+	apiRouter.Use(api.httpMiddlewareLog)
+
+	// Enable API level authentication
+	if api.apiKey != "" {
+		apiRouter.Use(api.httpMiddlewareAuthenticate)
+	}
+
+	apiRouter.
+		Methods(http.MethodGet).
+		Path("/ping").
+		HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+			rw.WriteHeader(http.StatusNoContent)
+		})
+
+	apiRouter.
 		Methods(http.MethodGet).
 		Path("/plugins").
 		HandlerFunc(api.DelugeHandler(httpGetPlugins))
 
-	router.
+	apiRouter.
 		Methods(http.MethodPost).
 		Path("/plugins/{id}").
 		HandlerFunc(api.DelugeHandler(httpEnablePlugin))
 
-	router.
+	apiRouter.
 		Methods(http.MethodDelete).
 		Path("/plugins/{id}").
 		HandlerFunc(api.DelugeHandler(httpDisablePlugin))
 
-	router.
+	apiRouter.
 		Methods(http.MethodGet).
 		Path("/torrents").
 		HandlerFunc(api.DelugeHandler(httpTorrentsStatus))
-	router.
+	apiRouter.
 		Methods(http.MethodPost).
 		Path("/torrents").
 		HandlerFunc(api.DelugeHandler(httpAddTorrent))
-	router.
+	apiRouter.
 		Methods(http.MethodDelete).
 		Path("/torrents").
 		HandlerFunc(api.DelugeHandler(httpDeleteTorrents))
-	router.
+	apiRouter.
 		Methods(http.MethodPost).
 		Path("/torrents/pause").
 		HandlerFunc(api.DelugeHandler(httpPauseTorrents))
-	router.
+	apiRouter.
 		Methods(http.MethodPost).
 		Path("/torrents/resume").
 		HandlerFunc(api.DelugeHandler(httpResumeTorrents))
 
-	router.
+	apiRouter.
 		Methods(http.MethodGet).
 		Path("/torrent/{id}").
 		HandlerFunc(api.DelugeHandler(TorrentHandler(httpTorrentStatus)))
-	router.
+	apiRouter.
 		Methods(http.MethodDelete).
 		Path("/torrent/{id}").
 		HandlerFunc(api.DelugeHandler(TorrentHandler(httpDeleteTorrent)))
-	router.
+	apiRouter.
 		Methods(http.MethodPut).
 		Path("/torrent/{id}").
 		HandlerFunc(api.DelugeHandler(TorrentHandler(httpSetTorrentOptions)))
-	router.
+	apiRouter.
 		Methods(http.MethodPost).
 		Path("/torrent/{id}/pause").
 		HandlerFunc(api.DelugeHandler(TorrentHandler(httpPauseTorrent)))
-	router.
+	apiRouter.
 		Methods(http.MethodPost).
 		Path("/torrent/{id}/resume").
 		HandlerFunc(api.DelugeHandler(TorrentHandler(httpResumeTorrent)))
 
-	router.
+	apiRouter.
 		Methods(http.MethodGet).
 		Path("/labels").
 		HandlerFunc(api.DelugeHandler(httpLabels))
 
-	router.
+	apiRouter.
 		Methods(http.MethodPost).
 		Path("/labels/{id}").
 		HandlerFunc(api.DelugeHandler(httpCreateLabel))
 
-	router.
+	apiRouter.
 		Methods(http.MethodDelete).
 		Path("/labels/{id}").
 		HandlerFunc(api.DelugeHandler(httpDeleteLabel))
 
-	router.
+	apiRouter.
 		Methods(http.MethodGet).
 		Path("/torrents/labels").
 		HandlerFunc(api.DelugeHandler(httpTorrentsLabels))
 
-	router.
+	apiRouter.
 		Methods(http.MethodPost).
 		Path("/torrent/{id}/label").
 		HandlerFunc(api.DelugeHandler(TorrentHandler(httpSetTorrentLabel)))

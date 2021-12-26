@@ -5,56 +5,66 @@ import (
 	"time"
 )
 
-var _ http.ResponseWriter = (*ResponseWriter)(nil)
+var _ http.ResponseWriter = (*WrappedResponse)(nil)
 
-func WrapResponse(rw http.ResponseWriter) *ResponseWriter {
-	return &ResponseWriter{
+// WrapResponse wraps a response
+func WrapResponse(rw http.ResponseWriter) *WrappedResponse {
+	return &WrappedResponse{
 		ResponseWriter: rw,
 		started:        time.Now().UTC(),
 	}
 }
 
-// ResponseWriter wraps an http.ResponseWriter to provide additional information the response.
-// Such as:
-//  - Processing Time
-//  - HTTP response code
-//  - Response payload size
-type ResponseWriter struct {
+// WrappedResponse wraps a http.ResponseWriter to capture information about the response
+type WrappedResponse struct {
 	http.ResponseWriter
 
 	started time.Time
 	sent    time.Time
 
 	code        int
+	error       error
 	payloadSize int
 }
 
-func (rw *ResponseWriter) WriteHeader(code int) {
+func (rw *WrappedResponse) WriteHeader(code int) {
 	rw.code = code
 	rw.sent = time.Now().UTC()
 	rw.ResponseWriter.WriteHeader(code)
+
+	// Set error based off the status text if an explicit error is not otherwise provided
+	if code > 399 && rw.error == nil {
+		rw.error = &Error{
+			Code:    code,
+			Message: http.StatusText(code),
+		}
+	}
 }
 
-func (rw *ResponseWriter) Write(b []byte) (int, error) {
+func (rw *WrappedResponse) Write(b []byte) (int, error) {
 	wr, err := rw.ResponseWriter.Write(b)
 	rw.payloadSize += wr
 	return wr, err
 }
 
-func (rw *ResponseWriter) Code() int {
+func (rw *WrappedResponse) Code() int {
 	return rw.code
 }
 
-func (rw *ResponseWriter) Started() time.Time {
+func (rw *WrappedResponse) Started() time.Time {
 	return rw.started
 }
 
 // Duration returns the total duration of the request to response.
-func (rw *ResponseWriter) Duration() time.Duration {
+func (rw *WrappedResponse) Duration() time.Duration {
 	return rw.sent.Sub(rw.started)
 }
 
 // Len returns the total payload size in bytes.
-func (rw *ResponseWriter) Len() int {
+func (rw *WrappedResponse) Len() int {
 	return rw.payloadSize
+}
+
+func (rw *WrappedResponse) Error() error {
+	return rw.error
 }

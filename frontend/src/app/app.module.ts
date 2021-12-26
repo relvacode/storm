@@ -11,7 +11,7 @@ import {ButtonModule} from 'primeng/button';
 import {RippleModule} from 'primeng/ripple';
 import {TooltipModule} from 'primeng/tooltip';
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
-import {ApiInterceptor} from './api.service';
+import {ApiInterceptor, AuthInterceptor} from './api.service';
 import {DropdownModule} from 'primeng/dropdown';
 import {OrderByPipe} from './order-by.pipe';
 import {FormsModule} from '@angular/forms';
@@ -51,6 +51,7 @@ import {
 import {PluginEnableComponent} from './components/plugin-enable/plugin-enable.component';
 import {MultiSelectModule} from "primeng/multiselect";
 import { ActivityMarkerComponent } from './components/activity-marker/activity-marker.component';
+import { ApiKeyDialogComponent } from './components/api-key-dialog/api-key-dialog.component';
 
 // @ts-ignore
 @NgModule({
@@ -74,6 +75,7 @@ import { ActivityMarkerComponent } from './components/activity-marker/activity-m
     TorrentEditLabelDialogComponent,
     PluginEnableComponent,
     ActivityMarkerComponent,
+    ApiKeyDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -102,6 +104,11 @@ import { ActivityMarkerComponent } from './components/activity-marker/activity-m
   ],
   entryComponents: [],
   providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true,
+    },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: ApiInterceptor,
