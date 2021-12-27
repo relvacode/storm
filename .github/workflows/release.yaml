@@ -54,6 +54,7 @@ jobs:
           extra_files: LICENSE README.md
           sha256sum: true
           md5sum: false
+          overwrite: true
   docker-image:
     name: Build Docker Image
     runs-on: ubuntu-latest
