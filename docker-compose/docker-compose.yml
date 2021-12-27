@@ -6,13 +6,14 @@ services:
     volumes:
       - deluge-config:/config
       - ./core.conf:/config/core.conf
+      - ./auth:/config/auth:ro
   storm:
-    build: .
+    image: ghcr.io/relvacode/storm
     environment:
       DELUGE_RPC_VERSION: v2
       DELUGE_RPC_HOSTNAME: deluge
       DELUGE_RPC_USERNAME: localclient
-      DELUGE_RPC_PASSWORD: 707228f42b81e12377e943271f8c05b796545cd2
+      DELUGE_RPC_PASSWORD: deluge
     ports:
       - "8221:8221"
 
