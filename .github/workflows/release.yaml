@@ -48,7 +48,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          asset_name: storm-${{ matrix.goos }}-${{ matrix.goarch }}
+          asset_name: ${BINARY_NAME}-${RELEASE_TAG}-${{ matrix.goos }}-${{ matrix.goarch }}
           project_path: "./cmd/storm"
           binary_name: "storm"
           extra_files: LICENSE README.md
