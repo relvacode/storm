@@ -60,7 +60,7 @@ jobs:
     permissions:
       packages: write
       contents: read
-    needs: compile-frontned
+    needs: compile-frontend
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
