@@ -65,3 +65,9 @@ Storm comes with a simple built-in authentication mechanism which can be enabled
 Set this to a reasonably secure password. Any requests made to Storm must now provide the API key in the request.
 
 You should also seriously consider the use of HTTPS over the internet, with services like LetsEncrypt it's relatively easy to get a valid SSL certificate for free.
+
+##### Deluge Version
+
+Deluge has a different interface between versions 1 and 2. You must set `DELUGE_RPC_VERSION` to either `v1` or `v2` based on the version you have installed. Storm defaults to `v1`.
+
+Note that in version 2, different RPC users are not able to see torrents created by another user [(#38)](https://github.com/relvacode/storm/issues/38). If you're using multiple Deluge clients (such as the vanilla Web UI, or Sonarr, etc) you should make sure they're all using the same Deluge RPC account to connect to Deluge.
