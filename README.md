@@ -49,6 +49,7 @@ Then you can use the following environment variables to configure Storm
 | Environment | Description |
 | ----------- | ----------- |
 | `DELUGE_RPC_HOSTNAME` | The Deluge RPC hostname |
+| `DELUGE_RPC_PORT` | The Deluge RPC port |
 | `DELUGE_RPC_USERNAME` | The username from Deluge auth |
 | `DELUGE_RPC_PASSWORD` | The password from Deluge auth |
 | `DELUGE_RPC_VERSION` | `v1` or `v2` depending on your Deluge version |
