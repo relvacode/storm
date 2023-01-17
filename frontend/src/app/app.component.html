@@ -26,6 +26,9 @@
   <t-breakpoint-overlay icon="fas fa-filter" [contentActivated]="(get$ | async) !== null" styleClass="t-filter-overlay">
     <p-dropdown class="t-filter-input" [options]="sortOptions" appendTo="body"
                 [(ngModel)]="sortByField" placeholder="Sort"></p-dropdown>
+    <button pButton pRipple (click)="sortReverse = !sortReverse" type="button" class="t-menu-button" 
+            [icon]="sortReverse ? 'fas fa-sort-down' : 'fas fa-sort-up'"
+            pTooltip="Change sorting"></button>
     <p-dropdown class="t-filter-input" [options]="filterStatesOptions" appendTo="body"
                 (onChange)="get$.next($event.value)" placeholder="State"></p-dropdown>
   </t-breakpoint-overlay>
@@ -49,7 +52,7 @@
   <div class="layout-content">
     <div class="p-grid">
       <div class="p-col-12"
-           *ngFor="let item of result | orderBy: sortByField; trackBy: trackBy">
+           *ngFor="let item of result | orderBy: sortByField : sortReverse ; trackBy: trackBy">
         <t-torrent [torrent]="item" [hash]="item.hash" [label]="item.Label"></t-torrent>
       </div>
     </div>

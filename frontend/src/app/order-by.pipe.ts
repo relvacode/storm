@@ -6,7 +6,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 })
 export class OrderByPipe implements PipeTransform {
 
-  transform<T>(values: Array<T>, field: undefined | keyof T): Array<T> {
+  transform<T>(values: Array<T>, field: undefined | keyof T, orderType: boolean): Array<T> {
     if (!field || !Array.isArray(values)) {
       // If no field is defined then return the values as-is
       return values;
@@ -17,11 +17,11 @@ export class OrderByPipe implements PipeTransform {
       const v1 = b[field];
 
       if (v0 < v1) {
-        return -1;
+        return orderType ? -1 : 1;
       }
 
       if (v0 > v1) {
-        return 1;
+        return orderType ? 1 : -1;
       }
 
       return 0;

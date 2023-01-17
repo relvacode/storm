@@ -22,6 +22,8 @@ interface HashedTorrent extends LabelledTorrent {
 export class AppComponent implements OnInit {
   sortByField: keyof Torrent = null;
 
+  sortReverse: boolean = false;
+
   sortOptions: SelectItem<keyof Torrent>[] = [
     {
       label: 'State',
