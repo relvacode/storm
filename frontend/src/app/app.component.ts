@@ -52,6 +52,10 @@ export class AppComponent implements OnInit {
     {
       label: 'Ratio',
       value: 'Ratio'
+    },
+    {
+      label: 'Seeding',
+      value: 'SeedingTime'
     }
   ];
 
