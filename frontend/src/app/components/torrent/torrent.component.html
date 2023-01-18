@@ -46,6 +46,11 @@
           <i class="far fa-hdd"></i>
           {{torrent.TotalSize | filesize}}
         </span>
+        
+       <span pTooltip="Seeding Time">
+          <i class="fas fa-leaf"></i>
+          {{torrent.SeedingTime | amDuration: 'seconds'}}
+        </span>
       </div>
 
       <div class="t-controls">
