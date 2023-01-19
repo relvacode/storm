@@ -65,6 +65,10 @@ export class AppComponent implements OnInit {
       value: null,
     },
     {
+      label: 'Active',
+      value: 'Active'
+    },
+    {
       label: 'Queued',
       value: 'Queued',
     },

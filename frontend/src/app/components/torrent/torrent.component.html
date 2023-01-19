@@ -17,19 +17,19 @@
       </div>
 
 
-      <div class="p-d-flex p-flex-column t-bar p-col-12 p-md-4">
-                  <span pTooltip="ETA" class="t-torrent-eta">
-          <i class="far fa-clock"></i>
-          <ng-container *ngIf="torrent.ETA else torrentInfinite">
-                      {{torrent.ETA | amDuration: 'seconds'}}
-          </ng-container>
-        </span>
-        <p-progressBar [value]="torrent.Progress | number: '1.0-2'">
-
-        </p-progressBar>
-      </div>
     </div>
 
+    <div class="p-d-flex p-flex-column t-bar p-col-12">
+                <span pTooltip="ETA" class="t-torrent-eta">
+        <i class="far fa-clock"></i>
+        <ng-container *ngIf="torrent.ETA else torrentInfinite">
+                    {{torrent.ETA | amDuration: 'seconds'}}
+        </ng-container>
+      </span>
+      <p-progressBar [value]="torrent.Progress | number: '1.0-2'">
+
+      </p-progressBar>
+    </div>
 
     <div class="p-d-flex p-flex-row p-justify-between t-details">
       <div class="t-info p-d-flex p-flex-row p-flex-wrap">
