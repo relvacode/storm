@@ -13,7 +13,8 @@
           <t-torrent-state [state]="torrent.State"></t-torrent-state>
          <span><i class="fas fa-percentage"></i></span><span>{{torrent.Ratio | number : '1.2-2'}}</span> 
          <t-torrent-label [hash]="hash" [label]="label"></t-torrent-label>
-        </div>
+         <span>{{torrent.Label}}</span>
+	</div>
       </div>
 
 
