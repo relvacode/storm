@@ -25,8 +25,18 @@ func httpTorrentsStatus(conn deluge.DelugeClient, r *http.Request) (interface{},
 		ids   = q["id"]
 		state = deluge.TorrentState(q.Get("state"))
 	)
-
-	return conn.TorrentsStatus(state, ids)
+        
+        var torrentsExtended = make(map[string]TorrentExtended)
+	var torrents, err  = conn.TorrentsStatus(state, ids)
+	var labels, lblErr = labelPluginClient(conn)
+	if lblErr != nil {
+		for id, t := range torrents {
+			var torrentLabel, _ = labels.GetTorrentLabel(id)
+			torrentsExtended[id] = TorrentExtended{TorrentStatus: t, Label: torrentLabel}
+		}
+		return torrentsExtended, err
+	}
+	return torrents, err
 }
 
 func httpDeleteTorrents(conn deluge.DelugeClient, r *http.Request) (interface{}, error) {
