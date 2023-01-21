@@ -53,6 +53,11 @@ type Api struct {
 	router *mux.Router
 }
 
+type TorrentExtended struct {
+	*deluge.TorrentStatus
+	Label	string
+}
+
 func (api *Api) DelugeHandler(f DelugeMethod) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		_ = Handle(rw, r, func(r *http.Request) (interface{}, error) {

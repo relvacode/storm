@@ -73,6 +73,7 @@ export interface Torrent {
   TrackerHost: string;
   TrackerStatus: string;
   UploadPayloadRate: number;
+  Label: string;
 
 // Files:         []File
 // Peers:         []Peer

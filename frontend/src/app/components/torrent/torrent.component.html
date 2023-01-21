@@ -11,24 +11,26 @@
         </div>
         <div class="p-card-subtitle t-torrent-detail">
           <t-torrent-state [state]="torrent.State"></t-torrent-state>
-          <t-torrent-label [hash]="hash" [label]="label"></t-torrent-label>
-        </div>
+         <span><i class="fas fa-percentage"></i></span><span>{{torrent.Ratio | number : '1.2-2'}}</span> 
+         <t-torrent-label [hash]="hash" [label]="label"></t-torrent-label>
+         <span>{{torrent.Label}}</span>
+	</div>
       </div>
 
 
-      <div class="p-d-flex p-flex-column t-bar p-col-12 p-md-4">
-                  <span pTooltip="ETA" class="t-torrent-eta">
-          <i class="far fa-clock"></i>
-          <ng-container *ngIf="torrent.ETA else torrentInfinite">
-                      {{torrent.ETA | amDuration: 'seconds'}}
-          </ng-container>
-        </span>
-        <p-progressBar [value]="torrent.Progress | number: '1.0-2'">
-
-        </p-progressBar>
-      </div>
     </div>
 
+    <div class="p-d-flex p-flex-column t-bar p-col-12">
+                <span pTooltip="ETA" class="t-torrent-eta">
+        <i class="far fa-clock"></i>
+        <ng-container *ngIf="torrent.ETA else torrentInfinite">
+                    {{torrent.ETA | amDuration: 'seconds'}}
+        </ng-container>
+      </span>
+      <p-progressBar [value]="torrent.Progress | number: '1.0-2'">
+
+      </p-progressBar>
+    </div>
 
     <div class="p-d-flex p-flex-row p-justify-between t-details">
       <div class="t-info p-d-flex p-flex-row p-flex-wrap">
@@ -45,6 +47,11 @@
         <span pTooltip="Total Size">
           <i class="far fa-hdd"></i>
           {{torrent.TotalSize | filesize}}
+        </span>
+        
+       <span pTooltip="Seeding Time">
+          <i class="fas fa-leaf"></i>
+          {{torrent.SeedingTime | amDuration: 'seconds'}}
         </span>
       </div>
 

@@ -22,6 +22,8 @@ interface HashedTorrent extends LabelledTorrent {
 export class AppComponent implements OnInit {
   sortByField: keyof Torrent = null;
 
+  sortReverse: boolean = false;
+
   sortOptions: SelectItem<keyof Torrent>[] = [
     {
       label: 'State',
@@ -50,6 +52,10 @@ export class AppComponent implements OnInit {
     {
       label: 'Ratio',
       value: 'Ratio'
+    },
+    {
+      label: 'Seeding',
+      value: 'SeedingTime'
     }
   ];
 
@@ -57,6 +63,10 @@ export class AppComponent implements OnInit {
     {
       label: 'All',
       value: null,
+    },
+    {
+      label: 'Active',
+      value: 'Active'
     },
     {
       label: 'Queued',
