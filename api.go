@@ -29,7 +29,7 @@ func appendSuffix(s, suffix string) string {
 	return fmt.Sprint(s, suffix)
 }
 
-func New(log *zap.Logger, pool *ConnectionPool, pathPrefix string, apiKey string) *Api {
+func New(log *zap.Logger, pool *ConnectionPool, pathPrefix string, apiKey string, development bool) *Api {
 	api := &Api{
 		pool:       pool,
 		pathPrefix: strings.TrimSuffix(pathPrefix, "/"),
@@ -39,7 +39,7 @@ func New(log *zap.Logger, pool *ConnectionPool, pathPrefix string, apiKey string
 	}
 
 	api.router.NotFoundHandler = api.httpNotFound()
-	api.bind()
+	api.bind(development)
 
 	return api
 }
@@ -51,11 +51,6 @@ type Api struct {
 
 	log    *zap.Logger
 	router *mux.Router
-}
-
-type TorrentExtended struct {
-	*deluge.TorrentStatus
-	Label	string
 }
 
 func (api *Api) DelugeHandler(f DelugeMethod) http.HandlerFunc {
@@ -150,10 +145,13 @@ func (api *Api) renderTemplate(fs afero.Fs, name string) {
 	}
 }
 
-func (api *Api) bindStatic(router *mux.Router) {
-	var (
-		static, _ = fs.Sub(Static, "frontend/dist")
+func (api *Api) bindStatic(router *mux.Router, development bool) {
+	var static, _ = fs.Sub(Static, "frontend/dist")
+	if development {
+		static = os.DirFS("./frontend/dist")
+	}
 
+	var (
 		mem = afero.NewMemMapFs()
 		ufs = afero.NewCopyOnWriteFs(&afero.FromIOFS{
 			FS: static,
@@ -172,8 +170,8 @@ func (api *Api) bindStatic(router *mux.Router) {
 
 // keyFromRequest attempts to locate the API key from the incoming request.
 // It looks for the key using these methods in the following order:
-// 		 - The password component of a Basic auth header
-//		 - The cookie value ApiAuthCookieName as a base64 encoded value
+//   - The password component of a Basic auth header
+//   - The cookie value ApiAuthCookieName as a base64 encoded value
 func (api *Api) keyFromRequest(r *http.Request) (string, bool) {
 	_, password, ok := r.BasicAuth()
 	if ok {
@@ -257,7 +255,7 @@ func (api *Api) httpMiddlewareAuthenticate(next http.Handler) http.Handler {
 	})
 }
 
-func (api *Api) bind() {
+func (api *Api) bind(development bool) {
 	primaryRouter := api.router
 	if api.pathPrefix != "" {
 		primaryRouter = api.router.PathPrefix(api.pathPrefix).Subrouter()
@@ -369,5 +367,5 @@ func (api *Api) bind() {
 		HandlerFunc(api.DelugeHandler(TorrentHandler(httpSetTorrentLabel)))
 
 	// Static files
-	api.bindStatic(primaryRouter)
+	api.bindStatic(primaryRouter, development)
 }

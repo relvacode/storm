@@ -56,10 +56,11 @@ func (p *Path) UnmarshalFlag(value string) error {
 }
 
 type ServerOptions struct {
-	Listen   string `short:"l" long:"listen" default:":8221" env:"LISTEN_ADDR" description:"The address for the HTTP server"`
-	LogStyle string `long:"log-style" choice:"production" choice:"console" default:"console" env:"LOGGING_STYLE" description:"The style of log messages"`
-	BasePath *Path  `long:"base-path" required:"true" default:"/" env:"STORM_BASE_PATH" description:"Respond to requests from this base URL path"`
-	ApiKey   string `long:"api-key" env:"STORM_API_KEY" description:"Set the password required to access the API (enables authentication)"`
+	Listen          string `short:"l" long:"listen" default:":8221" env:"LISTEN_ADDR" description:"The address for the HTTP server"`
+	LogStyle        string `long:"log-style" choice:"production" choice:"console" default:"console" env:"LOGGING_STYLE" description:"The style of log messages"`
+	BasePath        *Path  `long:"base-path" required:"true" default:"/" env:"STORM_BASE_PATH" description:"Respond to requests from this base URL path"`
+	ApiKey          string `long:"api-key" env:"STORM_API_KEY" description:"Set the password required to access the API (enables authentication)"`
+	DevelopmentMode bool   `long:"dev-mode" env:"DEV_MODE" description:"Run in development mode"`
 }
 
 func (options *ServerOptions) Logger() (*zap.Logger, error) {
@@ -170,9 +171,13 @@ func Main() error {
 	pool := (&options.DelugeOptions).Pool(log.Named("pool"))
 	defer pool.Close()
 
+	if options.DevelopmentMode {
+		log.Info("Running in development mode")
+	}
+
 	var (
 		apiLog = log.Named("api")
-		api    = storm.New(apiLog, pool, (string)(*options.BasePath), options.ServerOptions.ApiKey)
+		api    = storm.New(apiLog, pool, (string)(*options.BasePath), options.ServerOptions.ApiKey, options.DevelopmentMode)
 	)
 
 	return (&options.ServerOptions).RunHandler(ctx, apiLog, api)

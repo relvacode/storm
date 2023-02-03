@@ -66,6 +66,11 @@
                   "maximumError": "10kb"
                 }
               ]
+            },
+            "development": {
+              "sourceMap": true,
+              "buildOptimizer": false,
+              "optimization": false
             }
           }
         },
