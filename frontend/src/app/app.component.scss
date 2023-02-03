@@ -32,14 +32,12 @@
 ::ng-deep .t-filter-overlay {
   min-width: 160px;
 
+  & .t-sort-option {
+    margin-bottom: 12px;
+  }
+
   & > * {
     width: 100%;
-
-    &:not(:last-child) {
-      & .p-dropdown {
-        margin-bottom: .5rem;
-      }
-    }
 
     & .p-dropdown {
       width: 100%;
@@ -78,5 +76,35 @@
   & span {
     margin-top: 2rem;
     font-weight: 600;
+  }
+}
+
+
+t-breakpoint-overlay {
+  display: flex;
+  align-items: center;
+}
+
+.t-sort-option {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+
+
+  ::ng-deep & p-dropdown {
+    flex-grow: 1;
+    & .p-dropdown {
+      border-radius: 4px 0 0 4px;
+    }
+  }
+
+  & .t-sort-button {
+    background: #20262e;
+    border: 1px solid #3f4b5b;
+    border-radius: 0 4px 4px 0;
+    border-left: none;
+    width: 3rem;
+    color: rgba(255, 255, 255, 0.6);
   }
 }

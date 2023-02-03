@@ -1,10 +1,9 @@
-span {
-  &.t-state {
+.t-state {
+  &:before {
+    content: "\f111";
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 400;
     margin-right: 4px;
-
-    & i {
-      font-size: .6rem;
-    }
   }
 
   &.t-state-Queued {

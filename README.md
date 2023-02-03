@@ -71,3 +71,31 @@ You should also seriously consider the use of HTTPS over the internet, with serv
 Deluge has a different interface between versions 1 and 2. You must set `DELUGE_RPC_VERSION` to either `v1` or `v2` based on the version you have installed. Storm defaults to `v1`.
 
 Note that in version 2, different RPC users are not able to see torrents created by another user [(#38)](https://github.com/relvacode/storm/issues/38). If you're using multiple Deluge clients (such as the vanilla Web UI, or Sonarr, etc) you should make sure they're all using the same Deluge RPC account to connect to Deluge.
+
+#### Development
+
+The application is split into two parts, the frontend Angular code and the backend Go API adapter.
+
+The backend API is presented as an HTTP REST api which talks directly to the Deluge RPC daemon.
+It also has the frontend code embedded directly into the binary so the application can be distributed as a single binary.
+
+To start a development environment you must first install the node modules
+
+```
+cd frontend
+npm install
+```
+
+Then start the Angular build server in watch mode. This will output the frontend distributable into `frontend/dist` and watch for changes.
+
+```
+cd frontend
+npm run build -- --watch --configuration=development
+```
+
+In a separate terminal you can now start the main Storm binary in development mode.
+In development mode, instead of serving the frontend from the binary embedded source it will instead serve directly from the filesystem.
+
+```
+go run github.com/relvacode/storm/cmd/storm --listen=127.0.0.1:8221 --dev-mode [OPTIONS...]
+```

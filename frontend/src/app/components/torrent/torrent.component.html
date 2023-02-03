@@ -11,10 +11,8 @@
         </div>
         <div class="p-card-subtitle t-torrent-detail">
           <t-torrent-state [state]="torrent.State"></t-torrent-state>
-         <span><i class="fas fa-percentage"></i></span><span>{{torrent.Ratio | number : '1.2-2'}}</span> 
-         <t-torrent-label [hash]="hash" [label]="label"></t-torrent-label>
-         <span>{{torrent.Label}}</span>
-	</div>
+          <t-torrent-label [hash]="hash" [label]="label"></t-torrent-label>
+        </div>
       </div>
 
 
@@ -34,25 +32,24 @@
 
     <div class="p-d-flex p-flex-row p-justify-between t-details">
       <div class="t-info p-d-flex p-flex-row p-flex-wrap">
-        <span pTooltip="Download Speed">
-          <i class="fas fa-download"></i>
+        <span pTooltip="Download Speed" class="t-detail-download-rate">
           {{torrent.DownloadPayloadRate |filesize}}s
         </span>
 
-        <span pTooltip="Upload Speed">
-          <i class="fas fa-upload"></i>
+        <span pTooltip="Upload Speed" class="t-detail-upload-rate">
           {{torrent.UploadPayloadRate |filesize}}s
         </span>
 
-        <span pTooltip="Total Size">
-          <i class="far fa-hdd"></i>
+        <span pTooltip="Total Size" class="t-detail-total-size">
           {{torrent.TotalSize | filesize}}
         </span>
-        
-       <span pTooltip="Seeding Time">
-          <i class="fas fa-leaf"></i>
+
+        <span pTooltip="Seeding Time" class="t-detail-seeding-time">
           {{torrent.SeedingTime | amDuration: 'seconds'}}
         </span>
+
+        <t-torrent-seed-ratio [ratio]="torrent.Ratio"></t-torrent-seed-ratio>
+
       </div>
 
       <div class="t-controls">

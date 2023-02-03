@@ -1,21 +1,17 @@
-div.t-label {
+.t-label-container{
   cursor: pointer;
-  display: inline;
+}
 
-  &.no-label {
-    opacity: .4;
-  }
+.t-label-no-label {
+  font-style: italic;
+  opacity: .4;
+}
 
-  & .t-label-no-label {
-    font-style: italic;
-  }
-
-  & i {
-    font-size: .6rem;
-    vertical-align: middle;
-
-    &:not(:only-child) {
-      margin-right: 6px;
-    }
+.t-label {
+  &:before {
+    content: "\f02b";
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-right: 4px;
   }
 }
