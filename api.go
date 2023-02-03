@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/afero"
 	"go.uber.org/zap"
 	"html/template"
+	"io"
 	"io/fs"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -112,7 +112,7 @@ func (api *Api) renderTemplate(fs afero.Fs, name string) {
 		return
 	}
 
-	templateSource, err := ioutil.ReadAll(f)
+	templateSource, err := io.ReadAll(f)
 	if err != nil {
 		log.Error("failed to read template", zap.Error(err))
 		return
