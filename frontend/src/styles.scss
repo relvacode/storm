@@ -54,7 +54,6 @@ button.p-button {
   &:focus {
     box-shadow: none;
   }
-
 }
 
 .p-overlaypanel .p-overlaypanel-content {
@@ -70,4 +69,8 @@ button.p-button {
   .t-dialog-responsive {
     width: 100%
   }
+}
+
+.fas, .far {
+  writing-mode: horizontal-tb;
 }
