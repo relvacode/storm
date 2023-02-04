@@ -1,0 +1,22 @@
+.t-session-status {
+  width: 100%;
+  background: #343e4d;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 4px 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+
+  font-weight: 500;
+  font-size: .9rem;
+
+  & > span {
+    &:not(:last-child) {
+      margin-right: 1rem;
+    }
+  }
+
+  & i {
+    margin-right: 4px;
+  }
+}

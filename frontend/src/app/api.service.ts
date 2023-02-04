@@ -11,9 +11,9 @@ import {
 } from '@angular/common/http';
 import {catchError, retryWhen, switchMap, takeWhile} from 'rxjs/operators';
 import {Message} from 'primeng/api';
-import {Environment, ENVIRONMENT} from "./environment";
-import {DialogService} from "primeng/dynamicdialog";
-import {ApiKeyDialogComponent} from "./components/api-key-dialog/api-key-dialog.component";
+import {Environment, ENVIRONMENT} from './environment';
+import {DialogService} from 'primeng/dynamicdialog';
+import {ApiKeyDialogComponent} from './components/api-key-dialog/api-key-dialog.component';
 
 /**
  * Raised when the API returns an error
@@ -123,6 +123,18 @@ export interface SetTorrentLabelRequest {
   Label: string;
 }
 
+export interface SessionStatus {
+  HasIncomingConnections: boolean;
+  UploadRate: number;
+  DownloadRate: number;
+  PayloadUploadRate: number;
+  PayloadDownloadRate: number;
+  TotalDownload: number;
+  TotalUpload: number;
+  NumPeers: number;
+  DhtNodes: number;
+}
+
 export class ApiInterceptor implements HttpInterceptor {
   constructor() {
   }
@@ -199,6 +211,10 @@ export class ApiService {
    */
   public ping(): Observable<void> {
     return this.http.get<void>(this.url('ping'))
+  }
+
+  public sessionStatus(): Observable<SessionStatus> {
+    return this.http.get<SessionStatus>(this.url('session'))
   }
 
   /**

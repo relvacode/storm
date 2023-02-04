@@ -53,6 +53,7 @@ import {MultiSelectModule} from "primeng/multiselect";
 import { ActivityMarkerComponent } from './components/activity-marker/activity-marker.component';
 import { ApiKeyDialogComponent } from './components/api-key-dialog/api-key-dialog.component';
 import { TorrentSeedRatioComponent } from './components/torrent-seed-ratio/torrent-seed-ratio.component';
+import { SessionStatusComponent } from './components/session-status/session-status.component';
 
 // @ts-ignore
 @NgModule({
@@ -78,6 +79,7 @@ import { TorrentSeedRatioComponent } from './components/torrent-seed-ratio/torre
     ActivityMarkerComponent,
     ApiKeyDialogComponent,
     TorrentSeedRatioComponent,
+    SessionStatusComponent,
   ],
   imports: [
     BrowserModule,

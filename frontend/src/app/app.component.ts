@@ -1,12 +1,12 @@
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {BehaviorSubject, combineLatest, EMPTY, forkJoin, Observable, of, timer} from 'rxjs';
-import {catchError, filter, map, mergeMap, switchMap, tap} from 'rxjs/operators';
-import {ApiService, State, Torrent, TorrentLabels, Torrents} from './api.service';
+import {catchError, filter, mergeMap, switchMap, tap} from 'rxjs/operators';
+import {ApiService, SessionStatus, State, Torrent, Torrents} from './api.service';
 import {SelectItem} from 'primeng/api';
 import {FocusService} from './focus.service';
-import {DialogService} from "primeng/dynamicdialog";
-import {PluginEnableComponent} from "./components/plugin-enable/plugin-enable.component";
-import {LabelledTorrent} from "./torrent-search.pipe";
+import {DialogService} from 'primeng/dynamicdialog';
+import {PluginEnableComponent} from './components/plugin-enable/plugin-enable.component';
+import {LabelledTorrent} from './torrent-search.pipe';
 
 type OptionalState = State | null;
 
@@ -19,10 +19,9 @@ interface HashedTorrent extends LabelledTorrent {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   sortByField: keyof Torrent = null;
-
-  sortReverse: boolean = false;
+  sortReverse = false;
 
   sortOptions: SelectItem<keyof Torrent>[] = [
     {
@@ -97,6 +96,17 @@ export class AppComponent implements OnInit {
   // Current view is empty
   empty = false;
   stateInView: OptionalState;
+  sessionStatus: SessionStatus = {
+    HasIncomingConnections: false,
+    UploadRate: 0,
+    DownloadRate: 0,
+    PayloadUploadRate: 0,
+    PayloadDownloadRate: 0,
+    TotalDownload: 0,
+    TotalUpload: 0,
+    NumPeers: 0,
+    DhtNodes: 0,
+  };
 
   torrents: HashedTorrent[];
 
@@ -127,7 +137,7 @@ export class AppComponent implements OnInit {
       }
     });
 
-    return ref.onClose
+    return ref.onClose;
   }
 
   /**
@@ -144,46 +154,49 @@ export class AppComponent implements OnInit {
       switchMap(plugins => {
         const ok = plugins.findIndex(name => name === 'Label') > -1;
         if (ok) {
-          return of(true)
+          return of(true);
         }
 
-        return this.enableLabelPlugin()
+        return this.enableLabelPlugin();
       })
-    )
+    );
 
     const interval$ = combineLatest([timer$, this.focus.observe, this.get$, labelPluginEnabled$]);
 
     interval$.pipe(
       // Continue only when in focus
-      filter(([_, focus, state, pluginEnabled]) => focus),
+      filter(([_, focus]) => focus),
 
       // Switch to API response of torrents
       mergeMap(([_, focus, state]) => {
-        const torrents$ = this.api.torrents(state).pipe(
-          catchError(() => {
-            this.connected = false;
-            return EMPTY;
-          }),
-        )
-
-        const labels$ = this.api.torrentsLabels(state)
+        const torrents$ = this.api.torrents(state);
+        const labels$ = this.api.torrentsLabels(state);
+        const session$ = this.api.sessionStatus();
 
         return forkJoin({
           torrents: torrents$,
           labels: labels$,
-        })
+          session: session$,
+        }).pipe(
+          catchError(err => {
+            console.error('Connection error', err);
+            this.connected = false;
+            return EMPTY;
+          }),
+        );
       }),
 
       // Tap view information
       tap(response => this.empty = !this.tapEmptyView(response.torrents)),
       tap(response => this.stateInView = this.tapStateInView(response.torrents)),
       tap(response => this.hashesInView = this.tapHashesInView(response.torrents)),
-
-      map(response => this.transformResponse(response)),
     ).subscribe(
       response => {
-        this.torrents = response;
         this.connected = true;
+        this.sessionStatus = response.session;
+        this.torrents = Object.entries(response.torrents).map(
+          ([key, value]) => Object.assign({hash: key, Label: response.labels[key] || ''}, value)
+        );
       }
     );
   }
@@ -230,17 +243,6 @@ export class AppComponent implements OnInit {
     return state;
   }
 
-  /**
-   * Transforms an API hash-map of torrents to an array of HashedTorrent
-   * @param response
-   * Response from API
-   */
-  private transformResponse(response: { torrents: Torrents, labels: TorrentLabels }): HashedTorrent[] {
-    return Object.entries(response.torrents).map(
-      ([key, value]) => <HashedTorrent>Object.assign({hash: key, Label: response.labels[key] || ''}, value)
-    );
-  }
-
   public trackBy(torrent: HashedTorrent): string {
     return torrent.hash;
   }
@@ -265,8 +267,4 @@ export class AppComponent implements OnInit {
       _ => console.log(`torrents in view reached target state ${targetState}`)
     );
   }
-
-  ngOnInit(): void {
-  }
-
 }

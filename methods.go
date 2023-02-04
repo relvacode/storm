@@ -158,3 +158,7 @@ func httpSetTorrentOptions(id string, conn deluge.DelugeClient, r *http.Request)
 
 	return nil, conn.SetTorrentOptions(id, &req)
 }
+
+func httpGetSessionStatus(conn deluge.DelugeClient, _ *http.Request) (interface{}, error) {
+	return conn.GetSessionStatus()
+}
