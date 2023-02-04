@@ -20,3 +20,10 @@
     margin-right: 4px;
   }
 }
+
+
+@media only screen and (max-width: 750px) {
+  .t-session-status {
+    justify-content: center;
+  }
+}

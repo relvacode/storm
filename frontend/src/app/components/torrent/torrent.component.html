@@ -32,23 +32,30 @@
 
     <div class="p-d-flex p-flex-row p-justify-between t-details">
       <div class="t-info p-d-flex p-flex-row p-flex-wrap">
-        <span pTooltip="Download Speed" class="t-detail-download-rate">
+        <span pTooltip="Download speed" class="t-detail-download-rate">
+          <i class="fas fa-download"></i>
           {{torrent.DownloadPayloadRate |filesize}}s
         </span>
 
-        <span pTooltip="Upload Speed" class="t-detail-upload-rate">
+        <span pTooltip="Upload speed" class="t-detail-upload-rate">
+          <i class="fas fa-upload"></i>
           {{torrent.UploadPayloadRate |filesize}}s
         </span>
 
-        <span pTooltip="Total Size" class="t-detail-total-size">
+        <span pTooltip="Total size" class="t-detail-total-size">
+          <i class="far fa-hdd"></i>
           {{torrent.TotalSize | filesize}}
         </span>
 
-        <span pTooltip="Seeding Time" class="t-detail-seeding-time">
+        <span pTooltip="Seeding time" class="t-detail-seeding-time">
+          <i class="fas fa-leaf"></i>
           {{torrent.SeedingTime | amDuration: 'seconds'}}
         </span>
 
-        <t-torrent-seed-ratio [ratio]="torrent.Ratio"></t-torrent-seed-ratio>
+        <span pTooltip="Seed ratio" class="t-detail-seed-ratio">
+          <i class="fas fa-percentage"></i>
+          {{torrent.Ratio < 0 ? 0 : torrent.Ratio | number : '1.0-2'}}
+        </span>
 
       </div>
 

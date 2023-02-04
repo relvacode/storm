@@ -46,36 +46,12 @@
   opacity: .4;
   padding: .4rem;
 
-  & .t-detail-download-rate:before {
-    content: "\f019";
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    margin-right: 2px;
-  }
-
-  & .t-detail-upload-rate:before {
-    content: "\f093";
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    margin-right: 2px;
-  }
-
-  & .t-detail-total-size:before {
-    content: "\f0a0";
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 400;
-    margin-right: 2px;
-  }
-
-  & .t-detail-seeding-time:before {
-    content: "\f06c";
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    margin-right: 2px;
-  }
-
   & span {
     word-break: break-all;
+
+    & i {
+      margin-right: 2px;
+    }
 
     &:not(:last-child) {
       margin-right: 18px;

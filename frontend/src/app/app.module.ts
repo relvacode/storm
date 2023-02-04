@@ -43,16 +43,15 @@ import {BreakpointOverlayComponent} from './components/breakpoint-overlay/breakp
 import {TorrentSearchPipe} from './torrent-search.pipe';
 import {ConnectivityStatusComponent} from './components/connectivity-status/connectivity-status.component';
 import {TorrentSearchComponent} from './components/torrent-search/torrent-search.component';
-import {ENVIRONMENT} from "./environment";
+import {ENVIRONMENT} from './environment';
 import {TorrentLabelComponent} from './components/torrent-label/torrent-label.component';
 import {
   TorrentEditLabelDialogComponent
 } from './components/torrent-edit-label-dialog/torrent-edit-label-dialog.component';
 import {PluginEnableComponent} from './components/plugin-enable/plugin-enable.component';
-import {MultiSelectModule} from "primeng/multiselect";
+import {MultiSelectModule} from 'primeng/multiselect';
 import { ActivityMarkerComponent } from './components/activity-marker/activity-marker.component';
 import { ApiKeyDialogComponent } from './components/api-key-dialog/api-key-dialog.component';
-import { TorrentSeedRatioComponent } from './components/torrent-seed-ratio/torrent-seed-ratio.component';
 import { SessionStatusComponent } from './components/session-status/session-status.component';
 
 // @ts-ignore
@@ -78,7 +77,6 @@ import { SessionStatusComponent } from './components/session-status/session-stat
     PluginEnableComponent,
     ActivityMarkerComponent,
     ApiKeyDialogComponent,
-    TorrentSeedRatioComponent,
     SessionStatusComponent,
   ],
   imports: [
