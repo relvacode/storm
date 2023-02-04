@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {BehaviorSubject, combineLatest, EMPTY, forkJoin, Observable, of, timer} from 'rxjs';
-import {catchError, filter, mergeMap, switchMap, tap} from 'rxjs/operators';
-import {ApiService, SessionStatus, State, Torrent, Torrents} from './api.service';
+import {catchError, filter, mergeMap, switchMap} from 'rxjs/operators';
+import {ApiService, SessionStatus, State, Torrent} from './api.service';
 import {SelectItem} from 'primeng/api';
 import {FocusService} from './focus.service';
 import {DialogService} from 'primeng/dynamicdialog';
@@ -185,11 +185,6 @@ export class AppComponent {
           }),
         );
       }),
-
-      // Tap view information
-      tap(response => this.empty = !this.tapEmptyView(response.torrents)),
-      tap(response => this.stateInView = this.tapStateInView(response.torrents)),
-      tap(response => this.hashesInView = this.tapHashesInView(response.torrents)),
     ).subscribe(
       response => {
         this.connected = true;
@@ -197,50 +192,15 @@ export class AppComponent {
         this.torrents = Object.entries(response.torrents).map(
           ([key, value]) => Object.assign({hash: key, Label: response.labels[key] || ''}, value)
         );
+
+        this.empty = this.torrents.length === 0;
+        this.hashesInView = this.torrents.map(t => t.hash);
+
+        const statesInView = new Set(this.torrents.map(t => t.State));
+        const [onlyStateInView] = statesInView.size === 1 ? statesInView : [];
+        this.stateInView = onlyStateInView || null;
       }
     );
-  }
-
-  /**
-   * Returns true if no torrents were returned
-   * @param response
-   * Response from API
-   */
-  private tapEmptyView(response: Torrents): boolean {
-    return Object.keys(response).length > 0;
-  }
-
-  /**
-   * Gets the torrent hashes from an API response
-   * @param response
-   * Response from API
-   */
-  private tapHashesInView(response: Torrents): string[] {
-    return Object.keys(response);
-  }
-
-  /**
-   * Gets the unique state of all torrents from an API response.
-   * If there are no torrents or more than one state of the same type exists,
-   * then null is returned.
-   * @param response
-   * Response from API
-   */
-  private tapStateInView(response: Torrents): OptionalState {
-    let state: OptionalState = null;
-
-    for (const torrent of Object.values(response)) {
-      if (state === null) {
-        state = torrent.State;
-        continue;
-      }
-
-      if (state !== torrent.State) {
-        return null;
-      }
-    }
-
-    return state;
   }
 
   public trackBy(index: number, torrent: HashedTorrent): string {
