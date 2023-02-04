@@ -243,7 +243,7 @@ export class AppComponent {
     return state;
   }
 
-  public trackBy(torrent: HashedTorrent): string {
+  public trackBy(index: number, torrent: HashedTorrent): string {
     return torrent.hash;
   }
 
