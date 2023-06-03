@@ -1,9 +1,7 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {Torrent} from './api.service';
+import {Label, Torrent} from './api.service';
 
-export interface LabelledTorrent extends Torrent {
-  Label: string;
-}
+type LabelledTorrent = Label & Torrent;
 
 @Pipe({
   name: 'torrentSearch'

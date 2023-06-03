@@ -1,18 +1,14 @@
 import {Component} from '@angular/core';
 import {BehaviorSubject, combineLatest, EMPTY, forkJoin, Observable, of, timer} from 'rxjs';
 import {catchError, filter, mergeMap, switchMap} from 'rxjs/operators';
-import {ApiService, DiskSpace, SessionStatus, State, Torrent} from './api.service';
+import {ApiService, DiskSpace, Hash, SessionStatus, State, Torrent, ViewTorrent} from './api.service';
 import {SelectItem} from 'primeng/api';
 import {FocusService} from './focus.service';
 import {DialogService} from 'primeng/dynamicdialog';
 import {PluginEnableComponent} from './components/plugin-enable/plugin-enable.component';
-import {LabelledTorrent} from './torrent-search.pipe';
 
 type OptionalState = State | null;
 
-interface HashedTorrent extends LabelledTorrent {
-  hash: string;
-}
 
 @Component({
   selector: 't-root',
@@ -109,9 +105,10 @@ export class AppComponent {
   };
   diskSpace: DiskSpace;
 
-  torrents: HashedTorrent[];
+  torrents: ViewTorrent[];
 
   connected = true;
+  lastEtag: string;
 
   get$: BehaviorSubject<OptionalState>;
 
@@ -169,36 +166,24 @@ export class AppComponent {
       filter(([_, focus]) => focus),
 
       // Switch to API response of torrents
-      mergeMap(([_, focus, state]) => {
-        const torrents$ = this.api.torrents(state);
-        const labels$ = this.api.torrentsLabels(state);
-        const session$ = this.api.sessionStatus();
-        const disk$ = this.api.freeDiskSpace();
-
-        return forkJoin({
-          torrents: torrents$,
-          labels: labels$,
-          session: session$,
-          disk: disk$,
-        }).pipe(
-          catchError(err => {
-            console.error('Connection error', err);
-            this.connected = false;
-            return EMPTY;
-          }),
-        );
-      }),
+      mergeMap(([_, focus, state]) => this.api.viewUpdate(this.lastEtag, state).pipe(
+        catchError(err => {
+          console.error('Connection error', err);
+          this.connected = false;
+          this.lastEtag = null;
+          return EMPTY;
+        }),
+      )),
     ).subscribe(
       response => {
         this.connected = true;
-        this.sessionStatus = response.session;
-        this.diskSpace = response.disk;
-        this.torrents = Object.entries(response.torrents).map(
-          ([key, value]) => Object.assign({hash: key, Label: response.labels[key] || ''}, value)
-        );
+        this.sessionStatus = response.Session;
+        this.diskSpace = {FreeBytes: response.DiskFree};
+        this.torrents = response.Torrents;
 
         this.empty = this.torrents.length === 0;
-        this.hashesInView = this.torrents.map(t => t.hash);
+        this.hashesInView = this.torrents.map(t => t.Hash);
+        this.lastEtag = response.ETag;
 
         const statesInView = new Set(this.torrents.map(t => t.State));
         const [onlyStateInView] = statesInView.size === 1 ? statesInView : [];
@@ -207,12 +192,12 @@ export class AppComponent {
     );
   }
 
-  public trackBy(index: number, torrent: HashedTorrent): string {
-    return torrent.hash;
+  public trackBy(index: number, torrent: Hash): string {
+    return torrent.Hash;
   }
 
 
-  onToggleInView(targetState: 'pause' | 'resume', torrents: HashedTorrent[]): void {
+  onToggleInView(targetState: 'pause' | 'resume', torrents: ViewTorrent[]): void {
     if (!torrents || torrents.length === 0) {
       return;
     }
@@ -220,10 +205,10 @@ export class AppComponent {
     let res: Observable<void>;
     switch (targetState) {
       case 'pause':
-        res = this.api.pause(...torrents.filter(t => t.State !== 'Paused').map(t => t.hash));
+        res = this.api.pause(...torrents.filter(t => t.State !== 'Paused').map(t => t.Hash));
         break;
       case 'resume':
-        res = this.api.resume(...torrents.filter(t => t.State === 'Paused').map(t => t.hash));
+        res = this.api.resume(...torrents.filter(t => t.State === 'Paused').map(t => t.Hash));
         break;
     }
 
