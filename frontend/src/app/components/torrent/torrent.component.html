@@ -19,12 +19,21 @@
     </div>
 
     <div class="p-d-flex p-flex-column t-bar p-col-12">
-                <span pTooltip="ETA" class="t-torrent-eta">
-        <i class="far fa-clock"></i>
-        <ng-container *ngIf="torrent.ETA else torrentInfinite">
-                    {{torrent.ETA | amDuration: 'seconds'}}
-        </ng-container>
-      </span>
+      <div class="p-d-flex p-flex-row p-align-center t-torrent-progress">
+        <span pTooltip="ETA">
+          <i class="far fa-clock"></i>
+          <ng-container *ngIf="torrent.ETA else torrentInfinite">
+                      {{torrent.ETA | amDuration: 'seconds'}}
+          </ng-container>
+        </span>
+        <div class="spacer"></div>
+
+        <span pTooltip="Total size">
+          <i class="far fa-hdd"></i>
+          {{torrent.TotalSize | filesize}}
+        </span>
+      </div>
+
       <p-progressBar [value]="torrent.Progress | number: '1.0-2'">
 
       </p-progressBar>
@@ -32,24 +41,25 @@
 
     <div class="p-d-flex p-flex-row p-justify-between t-details">
       <div class="t-info p-d-flex p-flex-row p-flex-wrap">
-        <span pTooltip="Download Speed" class="t-detail-download-rate">
+        <span pTooltip="Download speed">
+          <i class="fas fa-download"></i>
           {{torrent.DownloadPayloadRate |filesize}}s
         </span>
 
-        <span pTooltip="Upload Speed" class="t-detail-upload-rate">
+        <span pTooltip="Upload speed">
+          <i class="fas fa-upload"></i>
           {{torrent.UploadPayloadRate |filesize}}s
         </span>
 
-        <span pTooltip="Total Size" class="t-detail-total-size">
-          {{torrent.TotalSize | filesize}}
+        <span pTooltip="Seeding time">
+          <i class="fas fa-leaf"></i>
+          {{torrent.SeedingTime === 0 ? '0s' : (torrent.SeedingTime | amDuration: 'seconds')}}
         </span>
 
-        <span pTooltip="Seeding Time" class="t-detail-seeding-time">
-          {{torrent.SeedingTime | amDuration: 'seconds'}}
+        <span pTooltip="Seed ratio">
+          <i class="fas fa-percentage"></i>
+          {{torrent.Ratio < 0 ? 0 : torrent.Ratio | number : '1.0-2'}}
         </span>
-
-        <t-torrent-seed-ratio [ratio]="torrent.Ratio"></t-torrent-seed-ratio>
-
       </div>
 
       <div class="t-controls">

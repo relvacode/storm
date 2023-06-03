@@ -3,7 +3,7 @@ module github.com/relvacode/storm
 go 1.17
 
 require (
-	github.com/gdm85/go-libdeluge v0.5.6
+	github.com/gdm85/go-libdeluge v0.6.0
 	github.com/gorilla/mux v1.8.0
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/spf13/afero v1.6.0

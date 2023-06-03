@@ -30,7 +30,7 @@
       <button pButton pRipple (click)="sortReverse = !sortReverse" type="button" class="t-sort-button"
               [icon]="sortReverse ? 'fas fa-sort-amount-up' : 'fas fa-sort-amount-down-alt'"
               [pTooltip]="sortReverse ? 'Sort descending': 'Sort ascending'"
-              ></button>
+      ></button>
     </div>
 
     <p-dropdown class="t-filter-input" [options]="filterStatesOptions" appendTo="body"
@@ -66,4 +66,9 @@
 </ng-container>
 
 
+<div class="t-bottom-bar">
+  <t-session-status [sessionStatus]="sessionStatus" [diskSpace]="diskSpace"></t-session-status>
+</div>
+
 <t-connectivity-status [connected]="connected"></t-connectivity-status>
+

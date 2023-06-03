@@ -286,6 +286,16 @@ func (api *Api) bind(development bool) {
 
 	apiRouter.
 		Methods(http.MethodGet).
+		Path("/session").
+		HandlerFunc(api.DelugeHandler(httpGetSessionStatus))
+
+	apiRouter.
+		Methods(http.MethodGet).
+		Path("/disk/free").
+		HandlerFunc(api.DelugeHandler(httpGetFreeSpace))
+
+	apiRouter.
+		Methods(http.MethodGet).
 		Path("/plugins").
 		HandlerFunc(api.DelugeHandler(httpGetPlugins))
 

@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TorrentSeedRatioComponent } from './torrent-seed-ratio.component';
+import { SessionStatusComponent } from './session-status.component';
 
-describe('TorrentSeedRatioComponent', () => {
-  let component: TorrentSeedRatioComponent;
-  let fixture: ComponentFixture<TorrentSeedRatioComponent>;
+describe('SessionStatusComponent', () => {
+  let component: SessionStatusComponent;
+  let fixture: ComponentFixture<SessionStatusComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TorrentSeedRatioComponent ]
+      declarations: [ SessionStatusComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TorrentSeedRatioComponent);
+    fixture = TestBed.createComponent(SessionStatusComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
