@@ -1,10 +1,10 @@
 import {Inject, Injectable} from '@angular/core';
-import {defer, Observable, ObservableInput, throwError} from 'rxjs';
+import {defer, EMPTY, Observable, ObservableInput, throwError} from 'rxjs';
 import {
   HttpClient,
   HttpErrorResponse,
   HttpEvent,
-  HttpHandler,
+  HttpHandler, HttpHeaders,
   HttpInterceptor,
   HttpParams,
   HttpRequest
@@ -80,6 +80,18 @@ export interface Torrent {
   FileProgress: number[];
 }
 
+export interface Label {
+  Label: string;
+}
+
+export interface Hash {
+  Hash: string;
+}
+
+export interface ViewTorrent extends Torrent, Hash, Label {
+}
+
+
 export interface Torrents {
   [id: string]: Torrent;
 }
@@ -139,6 +151,13 @@ export interface DiskSpace {
   FreeBytes: number;
 }
 
+export interface ViewUpdate {
+  Torrents: ViewTorrent[];
+  Session: SessionStatus;
+  DiskFree: number;
+  ETag: string;
+}
+
 export class ApiInterceptor implements HttpInterceptor {
   constructor() {
   }
@@ -176,7 +195,7 @@ export class AuthInterceptor implements HttpInterceptor {
       // Catch 401 errors and ask for the API key.
       // Redo the request with the provided API key in basic auth headers
       catchError((err: ApiException) => {
-        if (err.status != 401) {
+        if (err.status !== 401) {
           return throwError(err);
         }
 
@@ -227,6 +246,31 @@ export class ApiService {
         path
       }
     });
+  }
+
+  public viewUpdate(etag?: string, state?: State): Observable<ViewUpdate> {
+    let params = new HttpParams();
+    if (!!state) {
+      params = params.set('state', state);
+    }
+
+    let headers = new HttpHeaders();
+    if (!!etag) {
+      headers = headers.set('ETag', etag);
+    }
+
+    return this.http.get<ViewUpdate>(this.url('view'), {
+      params,
+      headers,
+    }).pipe(
+      catchError((err: ApiException) => {
+        if (err.status === 304) {
+          return EMPTY;
+        }
+
+        return throwError(err);
+      })
+    );
   }
 
   /**

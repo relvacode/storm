@@ -57,7 +57,7 @@
     <div class="p-grid">
       <div class="p-col-12"
            *ngFor="let item of result | orderBy: sortByField : sortReverse ; trackBy: trackBy">
-        <t-torrent [torrent]="item" [hash]="item.hash" [label]="item.Label"></t-torrent>
+        <t-torrent [torrent]="item" [hash]="item.Hash" [label]="item.Label"></t-torrent>
       </div>
     </div>
   </div>

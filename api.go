@@ -203,7 +203,11 @@ func (api *Api) logForRequest(rw *WrappedResponse, r *http.Request) {
 	var logLevelFunc = logger.Info
 
 	if rw.error != nil {
-		logLevelFunc = logger.With(zap.Error(rw.error)).Error
+		// Do not log notification errors
+		httpError, ok := rw.error.(HTTPError)
+		if !ok || httpError.StatusCode() >= 400 {
+			logLevelFunc = logger.With(zap.Error(rw.error)).Error
+		}
 	}
 
 	logLevelFunc(http.StatusText(rw.code))
@@ -293,6 +297,11 @@ func (api *Api) bind(development bool) {
 		Methods(http.MethodGet).
 		Path("/disk/free").
 		HandlerFunc(api.DelugeHandler(httpGetFreeSpace))
+
+	apiRouter.
+		Methods(http.MethodGet).
+		Path("/view").
+		HandlerFunc(api.DelugeHandler(httpViewUpdate))
 
 	apiRouter.
 		Methods(http.MethodGet).
