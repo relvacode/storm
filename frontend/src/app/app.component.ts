@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {BehaviorSubject, combineLatest, EMPTY, forkJoin, Observable, of, timer} from 'rxjs';
 import {catchError, filter, mergeMap, switchMap} from 'rxjs/operators';
-import {ApiService, SessionStatus, State, Torrent} from './api.service';
+import {ApiService, DiskSpace, SessionStatus, State, Torrent} from './api.service';
 import {SelectItem} from 'primeng/api';
 import {FocusService} from './focus.service';
 import {DialogService} from 'primeng/dynamicdialog';
@@ -107,6 +107,7 @@ export class AppComponent {
     NumPeers: 0,
     DhtNodes: 0,
   };
+  diskSpace: DiskSpace;
 
   torrents: HashedTorrent[];
 
@@ -172,11 +173,13 @@ export class AppComponent {
         const torrents$ = this.api.torrents(state);
         const labels$ = this.api.torrentsLabels(state);
         const session$ = this.api.sessionStatus();
+        const disk$ = this.api.freeDiskSpace();
 
         return forkJoin({
           torrents: torrents$,
           labels: labels$,
           session: session$,
+          disk: disk$,
         }).pipe(
           catchError(err => {
             console.error('Connection error', err);
@@ -189,6 +192,7 @@ export class AppComponent {
       response => {
         this.connected = true;
         this.sessionStatus = response.session;
+        this.diskSpace = response.disk;
         this.torrents = Object.entries(response.torrents).map(
           ([key, value]) => Object.assign({hash: key, Label: response.labels[key] || ''}, value)
         );

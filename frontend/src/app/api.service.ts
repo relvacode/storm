@@ -135,6 +135,10 @@ export interface SessionStatus {
   DhtNodes: number;
 }
 
+export interface DiskSpace {
+  FreeBytes: number;
+}
+
 export class ApiInterceptor implements HttpInterceptor {
   constructor() {
   }
@@ -161,9 +165,9 @@ export class AuthInterceptor implements HttpInterceptor {
         showHeader: true,
         closeOnEscape: false,
         closable: false,
-      })
+      });
 
-      return ref.onClose
+      return ref.onClose;
     });
   }
 
@@ -173,7 +177,7 @@ export class AuthInterceptor implements HttpInterceptor {
       // Redo the request with the provided API key in basic auth headers
       catchError((err: ApiException) => {
         if (err.status != 401) {
-          return throwError(err)
+          return throwError(err);
         }
 
         return this.ask$.pipe(
@@ -182,16 +186,16 @@ export class AuthInterceptor implements HttpInterceptor {
               headers: req.headers.set('Authorization', 'Basic ' + btoa(':' + key))
             });
 
-            return next.handle(withAuthHeaderReq)
+            return next.handle(withAuthHeaderReq);
           })
-        )
+        );
       }),
 
       // Keep retrying 401 errors
       retryWhen(errors => errors.pipe(
         takeWhile((err: ApiException) => err.status === 401)
       ))
-    )
+    );
   }
 }
 
@@ -210,18 +214,26 @@ export class ApiService {
    * Calls the ping endpoint
    */
   public ping(): Observable<void> {
-    return this.http.get<void>(this.url('ping'))
+    return this.http.get<void>(this.url('ping'));
   }
 
   public sessionStatus(): Observable<SessionStatus> {
-    return this.http.get<SessionStatus>(this.url('session'))
+    return this.http.get<SessionStatus>(this.url('session'));
+  }
+
+  public freeDiskSpace(path: string = ''): Observable<DiskSpace> {
+    return this.http.get<DiskSpace>(this.url('disk/free'), {
+      params: {
+        path
+      }
+    });
   }
 
   /**
    * Get a list of all the currently enabled plugins
    */
   public plugins(): Observable<string[]> {
-    return this.http.get<string[]>(this.url('plugins'))
+    return this.http.get<string[]>(this.url('plugins'));
   }
 
   /**
@@ -230,7 +242,7 @@ export class ApiService {
    * The plugin name to enable
    */
   public enablePlugin(name: string): Observable<void> {
-    return this.http.post<void>(this.url(`plugins/${name}`), null)
+    return this.http.post<void>(this.url(`plugins/${name}`), null);
   }
 
   /**
@@ -239,7 +251,7 @@ export class ApiService {
    * The plugin name to disable
    */
   public disablePlugin(name: string): Observable<void> {
-    return this.http.delete<void>(this.url(`plugins/${name}`))
+    return this.http.delete<void>(this.url(`plugins/${name}`));
   }
 
   /**
@@ -325,7 +337,7 @@ export class ApiService {
    * Gets available labels
    */
   public labels(): Observable<string[]> {
-    return this.http.get<string[]>(this.url('labels'))
+    return this.http.get<string[]>(this.url('labels'));
   }
 
   /**
@@ -334,7 +346,7 @@ export class ApiService {
    * The label name
    */
   public createLabel(name: string): Observable<void> {
-    return this.http.post<void>(this.url(`labels/${name}`), null)
+    return this.http.post<void>(this.url(`labels/${name}`), null);
   }
 
   /**
@@ -343,7 +355,7 @@ export class ApiService {
    * The label name
    */
   public deleteLabel(name: string): Observable<void> {
-    return this.http.delete<void>(this.url(`labels/${name}`))
+    return this.http.delete<void>(this.url(`labels/${name}`));
   }
 
   /**
@@ -354,7 +366,7 @@ export class ApiService {
    * An optional set of torrent IDs
    */
   public torrentsLabels(state?: State, ...torrents: string[]): Observable<TorrentLabels> {
-    return this.http.get<TorrentLabels>(this.url('torrents/labels'))
+    return this.http.get<TorrentLabels>(this.url('torrents/labels'));
   }
 
   /**
@@ -365,6 +377,6 @@ export class ApiService {
    * Request data
    */
   public setTorrentLabel(id: string, req: SetTorrentLabelRequest): Observable<void> {
-    return this.http.post<void>(this.url(`torrent/${id}/label`), req)
+    return this.http.post<void>(this.url(`torrent/${id}/label`), req);
   }
 }

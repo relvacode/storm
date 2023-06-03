@@ -162,3 +162,20 @@ func httpSetTorrentOptions(id string, conn deluge.DelugeClient, r *http.Request)
 func httpGetSessionStatus(conn deluge.DelugeClient, _ *http.Request) (interface{}, error) {
 	return conn.GetSessionStatus()
 }
+
+type GetFreeSpaceResponse struct {
+	FreeBytes int64
+}
+
+func httpGetFreeSpace(conn deluge.DelugeClient, r *http.Request) (interface{}, error) {
+	path := r.URL.Query().Get("path")
+
+	freeBytes, err := conn.GetFreeSpace(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return GetFreeSpaceResponse{
+		FreeBytes: freeBytes,
+	}, nil
+}
