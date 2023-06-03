@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {SessionStatus} from '../../api.service';
+import {DiskSpace, SessionStatus} from '../../api.service';
 
 @Component({
   selector: 't-session-status',
@@ -8,6 +8,7 @@ import {SessionStatus} from '../../api.service';
 })
 export class SessionStatusComponent implements OnInit {
   @Input() sessionStatus: SessionStatus;
+  @Input() diskSpace: DiskSpace;
 
   constructor() {
   }
