@@ -1,6 +1,7 @@
 package storm
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"net/http"
 )
@@ -14,9 +15,19 @@ func Send(rw http.ResponseWriter, code int, data interface{}) {
 	enc.SetIndent("", "  ")
 
 	rw.Header().Set("Content-Type", "application/json")
+	rw.Header().Set("Content-Encoding", "gzip")
 	rw.WriteHeader(code)
 
-	_ = enc.Encode(data)
+	body, err := json.Marshal(data)
+	if err != nil {
+		return
+	}
+	writer, err := gzip.NewWriterLevel(rw, gzip.BestCompression)
+	if err != nil {
+		return
+	}
+	defer writer.Close()
+	writer.Write(body)
 }
 
 // NoContent sends a 204 No Content response
