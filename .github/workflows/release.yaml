@@ -7,17 +7,17 @@ jobs:
     name: Compile Frontend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: |
           cd frontend
           npm install
           npm run build:prod
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: frontend-dist
           path: frontend/dist/
@@ -38,12 +38,12 @@ jobs:
           - goarch: arm
             goos: windows
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v3
         with:
           name: frontend-dist
           path: frontend/dist
-      - uses: wangyoucao577/go-release-action@v1.22
+      - uses: wangyoucao577/go-release-action@v1.40
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
@@ -63,19 +63,19 @@ jobs:
       contents: read
     needs: compile-frontend
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v3
         with:
           name: frontend-dist
           path: frontend/dist
-      - uses: docker/setup-qemu-action@v1
-      - uses: docker/setup-buildx-action@v1
-      - uses: docker/login-action@v1
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v2
+      - uses: docker/build-push-action@v5
         with:
           context: .
           push: true
